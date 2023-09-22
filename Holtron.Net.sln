@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EngineSpecific", "EngineSpe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Holtron.Net.XNA", "EngineSpecific\Holtron.Net.XNA\Holtron.Net.XNA.csproj", "{039B3F63-479A-4D67-9537-492807D9C754}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Holtron.Net.XNA.Tests", "EngineSpecific\Holtron.Net.XNA.Tests\Holtron.Net.XNA.Tests.csproj", "{86F7E033-E6C4-4558-A982-9C1603504FFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{039B3F63-479A-4D67-9537-492807D9C754}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{039B3F63-479A-4D67-9537-492807D9C754}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{039B3F63-479A-4D67-9537-492807D9C754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86F7E033-E6C4-4558-A982-9C1603504FFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86F7E033-E6C4-4558-A982-9C1603504FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86F7E033-E6C4-4558-A982-9C1603504FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86F7E033-E6C4-4558-A982-9C1603504FFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{2CB75459-2844-4AE3-A854-7442C9EF67EF} = {BBDC59E5-0840-4035-855A-50D6ABD4D6C5}
 		{78A31553-8C4E-4B5C-8C69-E9D67142E421} = {BBDC59E5-0840-4035-855A-50D6ABD4D6C5}
 		{039B3F63-479A-4D67-9537-492807D9C754} = {130C72D7-3F4C-4E53-896E-FDD6CAED04B7}
+		{86F7E033-E6C4-4558-A982-9C1603504FFD} = {130C72D7-3F4C-4E53-896E-FDD6CAED04B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B13F521-74CF-463D-918A-08FBCC596824}
