@@ -1,7 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+using Holtron.Net.Network;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 
-namespace Holtron.Net.Network.Xna
+namespace Holtron.Net.XNA
 {
     public static class XNAExtensions
     {
