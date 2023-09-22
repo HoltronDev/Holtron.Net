@@ -20,10 +20,10 @@ namespace Holtron.Net.Network
         /// </summary>
         public override int Next()
         {
-            var retval = (int)(0x7FFFFFFF & NextUInt32());
-            if (retval == 0x7FFFFFFF)
+            var ret = (int)(0x7FFFFFFF & NextUInt32());
+            if (ret == 0x7FFFFFFF)
                 return NextInt32();
-            return retval;
+            return ret;
         }
 
         /// <summary>
