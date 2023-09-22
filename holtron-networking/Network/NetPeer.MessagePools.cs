@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	public partial class NetPeer
+    public partial class NetPeer
 	{
 		internal List<byte[]> m_storagePool;
 		private NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;

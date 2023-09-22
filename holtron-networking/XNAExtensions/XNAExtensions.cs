@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using HoltronNetworking.Network;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace HoltronNetworking.Network.Xna

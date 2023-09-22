@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Status for a NetPeer instance
-	/// </summary>
-	public enum NetPeerStatus
+    /// <summary>
+    /// Status for a NetPeer instance
+    /// </summary>
+    public enum NetPeerStatus
 	{
 		/// <summary>
 		/// NetPeer is not running; socket is not bound

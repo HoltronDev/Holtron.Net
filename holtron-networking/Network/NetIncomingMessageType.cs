@@ -1,12 +1,8 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// The type of a NetIncomingMessage
-	/// </summary>
-	[SuppressMessage("Microsoft.Design", "CA1027:MarkEnumsWithFlags")]
+    /// <summary>
+    /// The type of a NetIncomingMessage
+    /// </summary>
 	public enum NetIncomingMessageType
 	{
 		//

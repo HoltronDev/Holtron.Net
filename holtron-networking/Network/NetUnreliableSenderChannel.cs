@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Sender part of Selective repeat ARQ for a particular NetChannel
-	/// </summary>
-	internal sealed class NetUnreliableSenderChannel : NetSenderChannelBase
+    /// <summary>
+    /// Sender part of Selective repeat ARQ for a particular NetChannel
+    /// </summary>
+    internal sealed class NetUnreliableSenderChannel : NetSenderChannelBase
 	{
 		private NetConnection m_connection;
 		private int m_windowStart;

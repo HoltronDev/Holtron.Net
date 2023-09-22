@@ -1,10 +1,8 @@
-using System;
-using System.IO;
 using System.Security.Cryptography;
 
 namespace HoltronNetworking.Network
 {
-	public class NetAESEncryption : NetCryptoProviderBase
+    public class NetAESEncryption : NetCryptoProviderBase
 	{
 		public NetAESEncryption(NetPeer peer)
 #if UNITY

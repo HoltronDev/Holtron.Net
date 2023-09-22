@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Specialized version of NetPeer used for "server" peers
-	/// </summary>
-	public class NetServer : NetPeer
+    /// <summary>
+    /// Specialized version of NetPeer used for "server" peers
+    /// </summary>
+    public class NetServer : NetPeer
 	{
 		/// <summary>
 		/// NetServer constructor

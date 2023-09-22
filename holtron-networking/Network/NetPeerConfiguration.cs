@@ -130,7 +130,7 @@ namespace HoltronNetworking.Network
 		/// </summary>
 		public void EnableMessageType(NetIncomingMessageType type)
 		{
-			m_disabledTypes &= (~type);
+			m_disabledTypes &= ~type;
 		}
 
 		/// <summary>

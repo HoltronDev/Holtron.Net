@@ -1,6 +1,4 @@
 ﻿#if !__ANDROID__ && !__CONSTRAINED__ && !WINDOWS_RUNTIME && !UNITY_STANDALONE_LINUX
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -9,7 +7,7 @@ using System.Security.Cryptography;
 
 namespace HoltronNetworking.Network
 {
-	public static partial class NetUtility
+    public static partial class NetUtility
 	{
 		private static readonly long s_timeInitialized = Stopwatch.GetTimestamp();
 		private static readonly double s_dInvFreq = 1.0 / (double)Stopwatch.Frequency;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -9,10 +6,10 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Represents a connection to a remote peer
-	/// </summary>
-	[DebuggerDisplay("RemoteUniqueIdentifier={RemoteUniqueIdentifier} RemoteEndPoint={m_remoteEndPoint}")]
+    /// <summary>
+    /// Represents a connection to a remote peer
+    /// </summary>
+    [DebuggerDisplay("RemoteUniqueIdentifier={RemoteUniqueIdentifier} RemoteEndPoint={m_remoteEndPoint}")]
 	public partial class NetConnection
 	{
 		private const int m_infrequentEventsSkipFrames = 8; // number of heartbeats to skip checking for infrequent events (ping, timeout etc)

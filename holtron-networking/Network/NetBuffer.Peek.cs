@@ -1,10 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	public partial class NetBuffer
+    public partial class NetBuffer
 	{
 		/// <summary>
 		/// Gets the internal data buffer
@@ -40,7 +36,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads an SByte without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public sbyte PeekSByte()
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= 8, c_readOverflowError);
@@ -97,7 +92,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads a UInt16 without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public UInt16 PeekUInt16()
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= 16, c_readOverflowError);
@@ -147,7 +141,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads a UInt32 without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public UInt32 PeekUInt32()
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= 32, c_readOverflowError);
@@ -158,7 +151,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads the specified number of bits into a UInt32 without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public UInt32 PeekUInt32(int numberOfBits)
 		{
 			NetException.Assert((numberOfBits > 0 && numberOfBits <= 32), "ReadUInt() can only read between 1 and 32 bits");
@@ -174,7 +166,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads a UInt64 without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public UInt64 PeekUInt64()
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= 64, c_readOverflowError);
@@ -204,7 +195,6 @@ namespace HoltronNetworking.Network
 		/// <summary>
 		/// Reads the specified number of bits into an UInt64 without advancing the read pointer
 		/// </summary>
-		[CLSCompliant(false)]
 		public UInt64 PeekUInt64(int numberOfBits)
 		{
 			NetException.Assert((numberOfBits > 0 && numberOfBits <= 64), "ReadUInt() can only read between 1 and 64 bits");

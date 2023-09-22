@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Interface for an encryption algorithm
-	/// </summary>
-	public abstract class NetEncryption
+    /// <summary>
+    /// Interface for an encryption algorithm
+    /// </summary>
+    public abstract class NetEncryption
 	{
 		/// <summary>
 		/// NetPeer

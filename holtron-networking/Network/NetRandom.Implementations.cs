@@ -1,12 +1,11 @@
-﻿using System;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Multiply With Carry random
-	/// </summary>
-	public class MWCRandom : NetRandom
+    /// <summary>
+    /// Multiply With Carry random
+    /// </summary>
+    public class MWCRandom : NetRandom
 	{
 		/// <summary>
 		/// Get global instance of MWCRandom

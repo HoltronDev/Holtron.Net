@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal sealed class NetUnreliableUnorderedReceiver : NetReceiverChannelBase
+    internal sealed class NetUnreliableUnorderedReceiver : NetReceiverChannelBase
 	{
 		private bool m_doFlowControl;
 

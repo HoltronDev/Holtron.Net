@@ -1,14 +1,12 @@
 ﻿// Uncomment the line below to get statistics in RELEASE builds
 //#define USE_RELEASE_STATISTICS
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Text;
 
 namespace HoltronNetworking.Network
 {
-	internal enum MessageResendReason
+    internal enum MessageResendReason
 	{
 		Delay,
 		HoleInSequence

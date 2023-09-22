@@ -1,16 +1,13 @@
-﻿using System;
-using System.Net;
-
-#if !__NOIPENDPOINT__
+﻿#if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
 #endif
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Specialized version of NetPeer used for a "client" connection. It does not accept any incoming connections and maintains a ServerConnection property
-	/// </summary>
-	public class NetClient : NetPeer
+    /// <summary>
+    /// Specialized version of NetPeer used for a "client" connection. It does not accept any incoming connections and maintains a ServerConnection property
+    /// </summary>
+    public class NetClient : NetPeer
 	{
 		/// <summary>
 		/// Gets the connection to the server, if any

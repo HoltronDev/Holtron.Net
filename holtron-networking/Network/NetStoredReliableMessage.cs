@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal struct NetStoredReliableMessage
+    internal struct NetStoredReliableMessage
 	{
 		public int NumSent;
 		public double LastSent;

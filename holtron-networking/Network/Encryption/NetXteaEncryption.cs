@@ -1,14 +1,11 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Text;
-using System.Security;
+﻿using System.Text;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Methods to encrypt and decrypt data using the XTEA algorithm
-	/// </summary>
-	public sealed class NetXtea : NetBlockEncryptionBase
+    /// <summary>
+    /// Methods to encrypt and decrypt data using the XTEA algorithm
+    /// </summary>
+    public sealed class NetXtea : NetBlockEncryptionBase
 	{
 		private const int c_blockSize = 8;
 		private const int c_keySize = 16;

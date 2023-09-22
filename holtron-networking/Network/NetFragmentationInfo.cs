@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	public sealed class NetFragmentationInfo
+    public sealed class NetFragmentationInfo
 	{
 		public int TotalFragmentCount;
 		public bool[] Received;

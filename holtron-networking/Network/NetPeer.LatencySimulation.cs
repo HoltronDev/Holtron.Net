@@ -1,10 +1,7 @@
 ﻿//#define USE_RELEASE_STATISTICS
 
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Diagnostics;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -12,7 +9,7 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetPeer
+    public partial class NetPeer
 	{
 
 #if DEBUG

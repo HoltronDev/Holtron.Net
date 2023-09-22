@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	public partial class NetConnection
+    public partial class NetConnection
 	{
 		private double m_sentPingTime;
 		private int m_sentPingNumber;

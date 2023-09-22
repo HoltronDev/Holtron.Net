@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Diagnostics;
 
 //
 // Comment for Linux Mono users: reports of library thread hangs on EnterReadLock() suggests switching to plain lock() works better
@@ -9,10 +6,10 @@ using System.Threading;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Thread safe (blocking) expanding queue with TryDequeue() and EnqueueFirst()
-	/// </summary>
-	[DebuggerDisplay("Count={Count} Capacity={Capacity}")]
+    /// <summary>
+    /// Thread safe (blocking) expanding queue with TryDequeue() and EnqueueFirst()
+    /// </summary>
+    [DebuggerDisplay("Count={Count} Capacity={Capacity}")]
 	public sealed class NetQueue<T>
 	{
 		// Example:

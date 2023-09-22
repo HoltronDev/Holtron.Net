@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal abstract class NetReceiverChannelBase
+    internal abstract class NetReceiverChannelBase
 	{
 		internal NetPeer m_peer;
 		internal NetConnection m_connection;

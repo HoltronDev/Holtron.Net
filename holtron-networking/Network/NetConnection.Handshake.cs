@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-
-#if !__NOIPENDPOINT__
+﻿#if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
 #endif
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetConnection
+    public partial class NetConnection
 	{
 		internal bool m_connectRequested;
 		internal bool m_disconnectRequested;

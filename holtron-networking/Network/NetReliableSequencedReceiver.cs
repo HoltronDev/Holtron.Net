@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal sealed class NetReliableSequencedReceiver : NetReceiverChannelBase
+    internal sealed class NetReliableSequencedReceiver : NetReceiverChannelBase
 	{
 		private int m_windowStart;
 		private int m_windowSize;

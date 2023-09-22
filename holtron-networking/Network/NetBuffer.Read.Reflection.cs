@@ -1,9 +1,8 @@
-using System;
 using System.Reflection;
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetBuffer
+    public partial class NetBuffer
 	{
 		/// <summary>
 		/// Reads all public and private declared instance fields of the object in alphabetical order using reflection

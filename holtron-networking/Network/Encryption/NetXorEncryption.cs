@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Example class; not very good encryption
-	/// </summary>
-	public class NetXorEncryption : NetEncryption
+    /// <summary>
+    /// Example class; not very good encryption
+    /// </summary>
+    public class NetXorEncryption : NetEncryption
 	{
 		private byte[] m_key;
 

@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace HoltronNetworking.Network
 {
-	public abstract class NetCryptoProviderBase : NetEncryption
+    public abstract class NetCryptoProviderBase : NetEncryption
 	{
 		protected SymmetricAlgorithm m_algorithm;
 

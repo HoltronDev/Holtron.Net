@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -9,10 +6,10 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Represents a local peer capable of holding zero, one or more connections to remote peers
-	/// </summary>
-	public partial class NetPeer
+    /// <summary>
+    /// Represents a local peer capable of holding zero, one or more connections to remote peers
+    /// </summary>
+    public partial class NetPeer
 	{
 		private static int s_initializedPeersCount;
 

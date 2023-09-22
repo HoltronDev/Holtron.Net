@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Net;
-
-#if !__NOIPENDPOINT__
+﻿#if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
 #endif
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetPeer
+    public partial class NetPeer
 	{
 		/// <summary>
 		/// Send a message to a specific connection

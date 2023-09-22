@@ -1,12 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Outgoing message used to send data to remote peer(s)
-	/// </summary>
-	[DebuggerDisplay("LengthBits={LengthBits}")]
+    /// <summary>
+    /// Outgoing message used to send data to remote peer(s)
+    /// </summary>
+    [DebuggerDisplay("LengthBits={LengthBits}")]
 	public sealed class NetOutgoingMessage : NetBuffer
 	{
 		internal NetMessageType m_messageType;

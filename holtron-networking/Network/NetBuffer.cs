@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetBuffer
+    public partial class NetBuffer
 	{
 		/// <summary>
 		/// Number of bytes to overallocate for each message to avoid resizing
@@ -14,7 +12,7 @@ namespace HoltronNetworking.Network
 		private static readonly Dictionary<Type, MethodInfo> s_readMethods;
 		private static readonly Dictionary<Type, MethodInfo> s_writeMethods;
 
-		internal byte[] m_data;
+		internal byte[] m_data = Array.Empty<byte>();
 		internal int m_bitLength;
 		internal int m_readPosition;
 
@@ -93,6 +91,8 @@ namespace HoltronNetworking.Network
 						s_writeMethods[pis[0].ParameterType] = mi;
 				}
 			}
+
+			s_buffer = Array.Empty<NetBuffer>();
 		}
 	}
 }

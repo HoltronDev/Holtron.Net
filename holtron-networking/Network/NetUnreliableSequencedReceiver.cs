@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal sealed class NetUnreliableSequencedReceiver : NetReceiverChannelBase
+    internal sealed class NetUnreliableSequencedReceiver : NetReceiverChannelBase
 	{
 		private int m_lastReceivedSequenceNumber = -1;
 

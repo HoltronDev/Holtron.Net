@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// All the constants used when compiling the library
-	/// </summary>
-	internal static class NetConstants
+    /// <summary>
+    /// All the constants used when compiling the library
+    /// </summary>
+    internal static class NetConstants
 	{
 		internal const int NumTotalChannels = 99;
 

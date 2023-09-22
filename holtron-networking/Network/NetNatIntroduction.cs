@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading;
-
-#if !__NOIPENDPOINT__
+﻿#if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
 #endif
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetPeer {
+    public partial class NetPeer {
 		private const byte HostByte = 1;
 		private const byte ClientByte = 0;
 

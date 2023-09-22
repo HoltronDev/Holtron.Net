@@ -1,10 +1,6 @@
-﻿using System;
-using System.Threading;
-using System.Collections.Generic;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal class ReceivedFragmentGroup
+    internal class ReceivedFragmentGroup
 	{
 		//public float LastReceived;
 		public byte[] Data;

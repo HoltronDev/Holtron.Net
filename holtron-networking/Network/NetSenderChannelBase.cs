@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal abstract class NetSenderChannelBase
+    internal abstract class NetSenderChannelBase
 	{
 		// access this directly to queue things in this channel
 		protected NetQueue<NetOutgoingMessage> m_queuedSends;

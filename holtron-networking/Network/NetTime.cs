@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Time service
-	/// </summary>
-	public static partial class NetTime
+    /// <summary>
+    /// Time service
+    /// </summary>
+    public static partial class NetTime
 	{
 		/// <summary>
 		/// Given seconds it will output a human friendly readable string (milliseconds if less than 60 seconds)

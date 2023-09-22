@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2010 Michael Lidgren
+﻿/* Copyright (c) 2023 Ben Holton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without
@@ -16,14 +16,13 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-using System;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Status for a NetConnection instance
-	/// </summary>
-	public enum NetConnectionStatus
+    /// <summary>
+    /// Status for a NetConnection instance
+    /// </summary>
+    public enum NetConnectionStatus
 	{
 		/// <summary>
 		/// No connection, or attempt, in place

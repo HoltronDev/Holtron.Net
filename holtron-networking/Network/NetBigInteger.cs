@@ -1,18 +1,44 @@
-﻿using System;
-using System.Text;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Big integer class based on BouncyCastle (http://www.bouncycastle.org) big integer code
-	/// </summary>
-	internal class NetBigInteger
-	{
-		private const long IMASK = 0xffffffffL;
+    /// <summary>
+    /// Big integer class based on BouncyCastle (http://www.bouncycastle.org) big integer code
+    /// </summary>
+    internal class NetBigInteger
+    {
+        #region Properties
+        public int BitLength
+        {
+            get
+            {
+                if (m_numBitLength == -1)
+                {
+                    m_numBitLength = m_sign == 0
+                        ? 0
+                        : CalcBitLength(0, m_magnitude);
+                }
+
+                return m_numBitLength;
+            }
+        }
+        public int IntValue 
+		{
+            get
+            {
+                return m_sign == 0 ? 0
+                    : m_sign > 0 ? m_magnitude[^1]
+                    : -m_magnitude[^1];
+            }
+        }
+        public int SignValue { get { return m_sign; } }
+        #endregion
+
+        #region Fields
+        private const long IMASK = 0xffffffffL;
 		private const ulong UIMASK = (ulong)IMASK;
 
 		private static readonly int[] ZeroMagnitude = Array.Empty<int>();
@@ -45,67 +71,34 @@ namespace HoltronNetworking.Network
 		private int m_numBits = -1; // cache BitCount() value
 		private int m_numBitLength = -1; // cache calcBitLength() value
 		private long m_quote = -1L; // -m^(-1) mod b, b = 2^32 (see Montgomery mult.)
+        #endregion
 
-		private static int GetByteLength(
-			int nBits)
-		{
-			return (nBits + BitsPerByte - 1) / BitsPerByte;
-		}
+        #region Constructors
+        public NetBigInteger(int sign, byte[] bytes) : this(sign, bytes, 0, bytes.Length)
+        { }
 
-		private NetBigInteger()
-		{
-		}
+        public NetBigInteger(int sign, byte[] bytes, int offset, int length)
+        {
+            if (sign < -1 || sign > 1)
+                throw new FormatException("Invalid sign value");
 
-		private NetBigInteger(
-			int signum,
-			int[] mag,
-			bool checkMag)
-		{
-			if (checkMag)
-			{
-				int i = 0;
-				while (i < mag.Length && mag[i] == 0)
-				{
-					++i;
-				}
+            if (sign == 0)
+            {
+                //sign = 0;
+                m_magnitude = ZeroMagnitude;
+            }
+            else
+            {
+                // copy bytes
+                m_magnitude = MakeMagnitude(bytes, offset, length);
+                m_sign = m_magnitude.Length < 1 ? 0 : sign;
+            }
+        }
 
-				if (i == mag.Length)
-				{
-					//					sign = 0;
-					m_magnitude = ZeroMagnitude;
-				}
-				else
-				{
-					m_sign = signum;
+		public NetBigInteger(string value) : this(value, 10)
+		{ }
 
-					if (i == 0)
-					{
-						m_magnitude = mag;
-					}
-					else
-					{
-						// strip leading 0 words
-						m_magnitude = new int[mag.Length - i];
-						Array.Copy(mag, i, m_magnitude, 0, m_magnitude.Length);
-					}
-				}
-			}
-			else
-			{
-				m_sign = signum;
-				m_magnitude = mag;
-			}
-		}
-
-		public NetBigInteger(
-			string value)
-			: this(value, 10)
-		{
-		}
-
-		public NetBigInteger(
-			string str,
-			int radix)
+		public NetBigInteger(string str, int radix)
 		{
 			if (str.Length == 0)
 				throw new FormatException("Zero length BigInteger");
@@ -256,16 +249,10 @@ namespace HoltronNetworking.Network
 			m_magnitude = b.m_magnitude;
 		}
 
-		public NetBigInteger(
-			byte[] bytes)
-			: this(bytes, 0, bytes.Length)
-		{
-		}
+		public NetBigInteger(byte[] bytes) : this(bytes, 0, bytes.Length)
+		{ }
 
-		public NetBigInteger(
-			byte[] bytes,
-			int offset,
-			int length)
+		public NetBigInteger(byte[] bytes, int offset, int length)
 		{
 			if (length == 0)
 				throw new FormatException("Zero length BigInteger");
@@ -314,127 +301,59 @@ namespace HoltronNetworking.Network
 				m_magnitude = MakeMagnitude(bytes, offset, length);
 				m_sign = m_magnitude.Length > 0 ? 1 : 0;
 			}
-		}
+        }
 
-		private static int[] MakeMagnitude(
-			byte[] bytes,
-			int offset,
-			int length)
-		{
-			int end = offset + length;
+        private NetBigInteger()
+        {
+            m_magnitude = Array.Empty<int>();
+        }
 
-			// strip leading zeros
-			int firstSignificant;
-			for (firstSignificant = offset; firstSignificant < end
-				&& bytes[firstSignificant] == 0; firstSignificant++)
-			{
-			}
+        private NetBigInteger(int signum, int[] mag, bool checkMag)
+        {
+            if (checkMag)
+            {
+                int i = 0;
+                while (i < mag.Length && mag[i] == 0)
+                {
+                    ++i;
+                }
 
-			if (firstSignificant >= end)
-			{
-				return ZeroMagnitude;
-			}
+                if (i == mag.Length)
+                {
+                    //					sign = 0;
+                    m_magnitude = ZeroMagnitude;
+                }
+                else
+                {
+                    m_sign = signum;
 
-			int nInts = (end - firstSignificant + 3) / BytesPerInt;
-			int bCount = (end - firstSignificant) % BytesPerInt;
-			if (bCount == 0)
-			{
-				bCount = BytesPerInt;
-			}
+                    if (i == 0)
+                    {
+                        m_magnitude = mag;
+                    }
+                    else
+                    {
+                        // strip leading 0 words
+                        m_magnitude = new int[mag.Length - i];
+                        Array.Copy(mag, i, m_magnitude, 0, m_magnitude.Length);
+                    }
+                }
+            }
+            else
+            {
+                m_sign = signum;
+                m_magnitude = mag;
+            }
+        }
+        #endregion
 
-			if (nInts < 1)
-			{
-				return ZeroMagnitude;
-			}
-
-			int[] mag = new int[nInts];
-
-			int v = 0;
-			int magnitudeIndex = 0;
-			for (int i = firstSignificant; i < end; ++i)
-			{
-				v <<= 8;
-				v |= bytes[i] & 0xff;
-				bCount--;
-				if (bCount <= 0)
-				{
-					mag[magnitudeIndex] = v;
-					magnitudeIndex++;
-					bCount = BytesPerInt;
-					v = 0;
-				}
-			}
-
-			if (magnitudeIndex < mag.Length)
-			{
-				mag[magnitudeIndex] = v;
-			}
-
-			return mag;
-		}
-
-		public NetBigInteger(
-			int sign,
-			byte[] bytes)
-			: this(sign, bytes, 0, bytes.Length)
-		{
-		}
-
-		public NetBigInteger(
-			int sign,
-			byte[] bytes,
-			int offset,
-			int length)
-		{
-			if (sign < -1 || sign > 1)
-				throw new FormatException("Invalid sign value");
-
-			if (sign == 0)
-			{
-				//sign = 0;
-				m_magnitude = ZeroMagnitude;
-			}
-			else
-			{
-				// copy bytes
-				m_magnitude = MakeMagnitude(bytes, offset, length);
-				m_sign = m_magnitude.Length < 1 ? 0 : sign;
-			}
-		}
-
-		public NetBigInteger Abs()
+        #region Public Methods
+        public NetBigInteger Abs()
 		{
 			return m_sign >= 0 ? this : Negate();
 		}
 
-		// return a = a + b - b preserved.
-		private static int[] AddMagnitudes(
-			int[] a,
-			int[] b)
-		{
-			int tI = a.Length - 1;
-			int vI = b.Length - 1;
-			long m = 0;
-
-			while (vI >= 0)
-			{
-				m += ((long)(uint)a[tI] + (long)(uint)b[vI--]);
-				a[tI--] = (int)m;
-				m = (long)((ulong)m >> 32);
-			}
-
-			if (m != 0)
-			{
-				while (tI >= 0 && ++a[tI--] == 0)
-				{
-				}
-			}
-
-			return a;
-		}
-
-		public NetBigInteger Add(
-			NetBigInteger value)
+		public NetBigInteger Add(NetBigInteger value)
 		{
 			if (m_sign == 0)
 				return value;
@@ -453,46 +372,7 @@ namespace HoltronNetworking.Network
 			return AddToMagnitude(value.m_magnitude);
 		}
 
-		private NetBigInteger AddToMagnitude(
-			int[] magToAdd)
-		{
-			int[] big, small;
-			if (m_magnitude.Length < magToAdd.Length)
-			{
-				big = magToAdd;
-				small = m_magnitude;
-			}
-			else
-			{
-				big = m_magnitude;
-				small = magToAdd;
-			}
-
-			// Conservatively avoid over-allocation when no overflow possible
-			uint limit = uint.MaxValue;
-			if (big.Length == small.Length)
-				limit -= (uint)small[0];
-
-			bool possibleOverflow = (uint)big[0] >= limit;
-
-			int[] bigCopy;
-			if (possibleOverflow)
-			{
-				bigCopy = new int[big.Length + 1];
-				big.CopyTo(bigCopy, 1);
-			}
-			else
-			{
-				bigCopy = (int[])big.Clone();
-			}
-
-			bigCopy = AddMagnitudes(bigCopy, small);
-
-			return new NetBigInteger(m_sign, bigCopy, possibleOverflow);
-		}
-
-		public NetBigInteger And(
-			NetBigInteger value)
+		public NetBigInteger And(NetBigInteger value)
 		{
 			if (m_sign == 0 || value.m_sign == 0)
 			{
@@ -546,145 +426,13 @@ namespace HoltronNetworking.Network
 
 			return result;
 		}
-	
-		private int CalcBitLength(
-			int indx,
-			int[] mag)
-		{
-			for (; ; )
-			{
-				if (indx >= mag.Length)
-					return 0;
 
-				if (mag[indx] != 0)
-					break;
-
-				++indx;
-			}
-
-			// bit length for everything after the first int
-			int bitLength = 32 * ((mag.Length - indx) - 1);
-
-			// and determine bitlength of first int
-			int firstMag = mag[indx];
-			bitLength += BitLen(firstMag);
-
-			// Check for negative powers of two
-			if (m_sign < 0 && ((firstMag & -firstMag) == firstMag))
-			{
-				do
-				{
-					if (++indx >= mag.Length)
-					{
-						--bitLength;
-						break;
-					}
-				}
-				while (mag[indx] == 0);
-			}
-
-			return bitLength;
-		}
-
-		public int BitLength
-		{
-			get
-			{
-				if (m_numBitLength == -1)
-				{
-					m_numBitLength = m_sign == 0
-						? 0
-						: CalcBitLength(0, m_magnitude);
-				}
-
-				return m_numBitLength;
-			}
-		}
-
-		//
-		// BitLen(value) is the number of bits in value.
-		//
-		private static int BitLen(
-			int w)
-		{
-			// Binary search - decision tree (5 tests, rarely 6)
-			return (w < 1 << 15 ? (w < 1 << 7
-				? (w < 1 << 3 ? (w < 1 << 1
-				? (w < 1 << 0 ? (w < 0 ? 32 : 0) : 1)
-				: (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
-				? (w < 1 << 4 ? 4 : 5)
-				: (w < 1 << 6 ? 6 : 7)))
-				: (w < 1 << 11
-				? (w < 1 << 9 ? (w < 1 << 8 ? 8 : 9) : (w < 1 << 10 ? 10 : 11))
-				: (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14 ? 14 : 15)))) : (w < 1 << 23 ? (w < 1 << 19
-				? (w < 1 << 17 ? (w < 1 << 16 ? 16 : 17) : (w < 1 << 18 ? 18 : 19))
-				: (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
-				? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
-				: (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
-		}
-
-		private bool QuickPow2Check()
-		{
-			return m_sign > 0 && m_numBits == 1;
-		}
-
-		public int CompareTo(
-			object obj)
+		public int CompareTo(object obj)
 		{
 			return CompareTo((NetBigInteger)obj);
 		}
 
-		
-		// unsigned comparison on two arrays - note the arrays may
-		// start with leading zeros.
-		private static int CompareTo(
-			int xIndx,
-			int[] x,
-			int yIndx,
-			int[] y)
-		{
-			while (xIndx != x.Length && x[xIndx] == 0)
-			{
-				xIndx++;
-			}
-
-			while (yIndx != y.Length && y[yIndx] == 0)
-			{
-				yIndx++;
-			}
-
-			return CompareNoLeadingZeroes(xIndx, x, yIndx, y);
-		}
-
-		private static int CompareNoLeadingZeroes(
-			int xIndx,
-			int[] x,
-			int yIndx,
-			int[] y)
-		{
-			int diff = (x.Length - y.Length) - (xIndx - yIndx);
-
-			if (diff != 0)
-			{
-				return diff < 0 ? -1 : 1;
-			}
-
-			// lengths of magnitudes the same, test the magnitude values
-
-			while (xIndx < x.Length)
-			{
-				uint v1 = (uint)x[xIndx++];
-				uint v2 = (uint)y[yIndx++];
-
-				if (v1 != v2)
-					return v1 < v2 ? -1 : 1;
-			}
-
-			return 0;
-		}
-
-		public int CompareTo(
-			NetBigInteger value)
+		public int CompareTo(NetBigInteger value)
 		{
 			return m_sign < value.m_sign ? -1
 				: m_sign > value.m_sign ? 1
@@ -692,141 +440,7 @@ namespace HoltronNetworking.Network
 				: m_sign * CompareNoLeadingZeroes(0, m_magnitude, 0, value.m_magnitude);
 		}
 
-		// return z = x / y - done in place (z value preserved, x contains the remainder)
-		private int[] Divide(
-			int[] x,
-			int[] y)
-		{
-			int xStart = 0;
-			while (xStart < x.Length && x[xStart] == 0)
-			{
-				++xStart;
-			}
-
-			int yStart = 0;
-			while (yStart < y.Length && y[yStart] == 0)
-			{
-				++yStart;
-			}
-
-			Debug.Assert(yStart < y.Length);
-
-			int xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
-			int[] count;
-
-			if (xyCmp > 0)
-			{
-				int yBitLength = CalcBitLength(yStart, y);
-				int xBitLength = CalcBitLength(xStart, x);
-				int shift = xBitLength - yBitLength;
-
-				int[] iCount;
-				int iCountStart = 0;
-
-				int[] c;
-				int cStart = 0;
-				int cBitLength = yBitLength;
-				if (shift > 0)
-				{
-					//					iCount = ShiftLeft(One.magnitude, shift);
-					iCount = new int[(shift >> 5) + 1];
-					iCount[0] = 1 << (shift % 32);
-
-					c = ShiftLeft(y, shift);
-					cBitLength += shift;
-				}
-				else
-				{
-					iCount = new int[] { 1 };
-
-					int len = y.Length - yStart;
-					c = new int[len];
-					Array.Copy(y, yStart, c, 0, len);
-				}
-
-				count = new int[iCount.Length];
-
-				for (; ; )
-				{
-					if (cBitLength < xBitLength
-						|| CompareNoLeadingZeroes(xStart, x, cStart, c) >= 0)
-					{
-						Subtract(xStart, x, cStart, c);
-						AddMagnitudes(count, iCount);
-
-						while (x[xStart] == 0)
-						{
-							if (++xStart == x.Length)
-								return count;
-						}
-
-						//xBitLength = calcBitLength(xStart, x);
-						xBitLength = 32 * (x.Length - xStart - 1) + BitLen(x[xStart]);
-
-						if (xBitLength <= yBitLength)
-						{
-							if (xBitLength < yBitLength)
-								return count;
-
-							xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
-
-							if (xyCmp <= 0)
-								break;
-						}
-					}
-
-					shift = cBitLength - xBitLength;
-
-					// NB: The case where c[cStart] is 1-bit is harmless
-					if (shift == 1)
-					{
-						uint firstC = (uint)c[cStart] >> 1;
-						uint firstX = (uint)x[xStart];
-						if (firstC > firstX)
-							++shift;
-					}
-
-					if (shift < 2)
-					{
-						c = ShiftRightOneInPlace(cStart, c);
-						--cBitLength;
-						iCount = ShiftRightOneInPlace(iCountStart, iCount);
-					}
-					else
-					{
-						c = ShiftRightInPlace(cStart, c, shift);
-						cBitLength -= shift;
-						iCount = ShiftRightInPlace(iCountStart, iCount, shift);
-					}
-
-					//cStart = c.Length - ((cBitLength + 31) / 32);
-					while (c[cStart] == 0)
-					{
-						++cStart;
-					}
-
-					while (iCount[iCountStart] == 0)
-					{
-						++iCountStart;
-					}
-				}
-			}
-			else
-			{
-				count = new int[1];
-			}
-
-			if (xyCmp == 0)
-			{
-				AddMagnitudes(count, One.m_magnitude);
-				Array.Clear(x, xStart, x.Length - xStart);
-			}
-
-			return count;
-		}
-
-		public NetBigInteger Divide(
-			NetBigInteger val)
+		public NetBigInteger Divide(NetBigInteger val)
 		{
 			if (val.m_sign == 0)
 				throw new ArithmeticException("Division by zero error");
@@ -845,8 +459,7 @@ namespace HoltronNetworking.Network
 			return new NetBigInteger(m_sign * val.m_sign, Divide(mag, val.m_magnitude), true);
 		}
 
-		public NetBigInteger[] DivideAndRemainder(
-			NetBigInteger val)
+		public NetBigInteger[] DivideAndRemainder(NetBigInteger val)
 		{
 			if (val.m_sign == 0)
 				throw new ArithmeticException("Division by zero error");
@@ -901,8 +514,7 @@ namespace HoltronNetworking.Network
 			return true;
 		}
 
-		public NetBigInteger Gcd(
-			NetBigInteger value)
+		public NetBigInteger Gcd(NetBigInteger value)
 		{
 			if (value.m_sign == 0)
 				return Abs();
@@ -939,42 +551,18 @@ namespace HoltronNetworking.Network
 
 			return m_sign < 0 ? ~hc : hc;
 		}
-
-		private NetBigInteger Inc()
-		{
-			if (m_sign == 0)
-				return One;
-
-			if (m_sign < 0)
-				return new NetBigInteger(-1, DoSubBigLil(m_magnitude, One.m_magnitude), true);
-
-			return AddToMagnitude(One.m_magnitude);
-		}
-
-		public int IntValue
-		{
-			get
-			{
-				return m_sign == 0 ? 0
-					: m_sign > 0 ? m_magnitude[^1]
-					: -m_magnitude[^1];
-			}
-		}
 	
-		public NetBigInteger Max(
-			NetBigInteger value)
+		public NetBigInteger Max(NetBigInteger value)
 		{
 			return CompareTo(value) > 0 ? this : value;
 		}
 
-		public NetBigInteger Min(
-			NetBigInteger value)
+		public NetBigInteger Min(NetBigInteger value)
 		{
 			return CompareTo(value) < 0 ? this : value;
 		}
 
-		public NetBigInteger Mod(
-			NetBigInteger m)
+		public NetBigInteger Mod(NetBigInteger m)
 		{
 			if (m.m_sign < 1)
 				throw new ArithmeticException("Modulus must be positive");
@@ -984,8 +572,7 @@ namespace HoltronNetworking.Network
 			return (biggie.m_sign >= 0 ? biggie : biggie.Add(m));
 		}
 
-		public NetBigInteger ModInverse(
-			NetBigInteger m)
+		public NetBigInteger ModInverse(NetBigInteger m)
 		{
 			if (m.m_sign < 1)
 				throw new ArithmeticException("Modulus must be positive");
@@ -1006,57 +593,7 @@ namespace HoltronNetworking.Network
 			return x;
 		}
 
-		private static NetBigInteger ExtEuclid(
-			NetBigInteger a,
-			NetBigInteger b,
-			NetBigInteger u1Out,
-			NetBigInteger u2Out)
-		{
-			NetBigInteger u1 = One;
-			NetBigInteger u3 = a;
-			NetBigInteger v1 = Zero;
-			NetBigInteger v3 = b;
-
-			while (v3.m_sign > 0)
-			{
-				NetBigInteger[] q = u3.DivideAndRemainder(v3);
-
-				NetBigInteger tmp = v1.Multiply(q[0]);
-				NetBigInteger tn = u1.Subtract(tmp);
-				u1 = v1;
-				v1 = tn;
-
-				u3 = v3;
-				v3 = q[1];
-			}
-
-			if (u1Out != null)
-			{
-				u1Out.m_sign = u1.m_sign;
-				u1Out.m_magnitude = u1.m_magnitude;
-			}
-
-			if (u2Out != null)
-			{
-				NetBigInteger tmp = u1.Multiply(a);
-				tmp = u3.Subtract(tmp);
-				NetBigInteger res = tmp.Divide(b);
-				u2Out.m_sign = res.m_sign;
-				u2Out.m_magnitude = res.m_magnitude;
-			}
-
-			return u3;
-		}
-
-		private static void ZeroOut(
-			int[] x)
-		{
-			Array.Clear(x, 0, x.Length);
-		}
-
-		public NetBigInteger ModPow(
-			NetBigInteger exponent,
-			NetBigInteger m)
+		public NetBigInteger ModPow(NetBigInteger exponent, NetBigInteger m)
 		{
 			if (m.m_sign < 1)
 				throw new ArithmeticException("Modulus must be positive");
@@ -1219,285 +756,12 @@ namespace HoltronNetworking.Network
 				: result.ModInverse(m);
 		}
 
-		// return w with w = x * x - w is assumed to have enough space.
-		private static int[] Square(
-			int[] w,
-			int[] x)
-		{
-			// Note: this method allows w to be only (2 * x.Length - 1) words if result will fit
-			//			if (w.Length != 2 * x.Length)
-			//				throw new ArgumentException("no I don't think so...");
-
-			ulong u1, u2, c;
-
-			int wBase = w.Length - 1;
-
-			for (int i = x.Length - 1; i != 0; i--)
-			{
-				ulong v = (ulong)(uint)x[i];
-
-				u1 = v * v;
-				u2 = u1 >> 32;
-				u1 = (uint)u1;
-
-				u1 += (ulong)(uint)w[wBase];
-
-				w[wBase] = (int)(uint)u1;
-				c = u2 + (u1 >> 32);
-
-				for (int j = i - 1; j >= 0; j--)
-				{
-					--wBase;
-					u1 = v * (ulong)(uint)x[j];
-					u2 = u1 >> 31; // multiply by 2!
-					u1 = (uint)(u1 << 1); // multiply by 2!
-					u1 += c + (ulong)(uint)w[wBase];
-
-					w[wBase] = (int)(uint)u1;
-					c = u2 + (u1 >> 32);
-				}
-
-				c += (ulong)(uint)w[--wBase];
-				w[wBase] = (int)(uint)c;
-
-				if (--wBase >= 0)
-				{
-					w[wBase] = (int)(uint)(c >> 32);
-				}
-				else
-				{
-					Debug.Assert((uint)(c >> 32) == 0);
-				}
-				wBase += i;
-			}
-
-			u1 = (ulong)(uint)x[0];
-			u1 *= u1;
-			u2 = u1 >> 32;
-			u1 &= IMASK;
-
-			u1 += (ulong)(uint)w[wBase];
-
-			w[wBase] = (int)(uint)u1;
-			if (--wBase >= 0)
-			{
-				w[wBase] = (int)(uint)(u2 + (u1 >> 32) + (ulong)(uint)w[wBase]);
-			}
-			else
-			{
-				Debug.Assert((uint)(u2 + (u1 >> 32)) == 0);
-			}
-
-			return w;
-		}
-
-		// return x with x = y * z - x is assumed to have enough space.
-		private static int[] Multiply(
-			int[] x,
-			int[] y,
-			int[] z)
-		{
-			int i = z.Length;
-
-			if (i < 1)
-				return x;
-
-			int xBase = x.Length - y.Length;
-
-			for (; ; )
-			{
-				long a = z[--i] & IMASK;
-				long val = 0;
-
-				for (int j = y.Length - 1; j >= 0; j--)
-				{
-					val += a * (y[j] & IMASK) + (x[xBase + j] & IMASK);
-
-					x[xBase + j] = (int)val;
-
-					val = (long)((ulong)val >> 32);
-				}
-
-				--xBase;
-
-				if (i < 1)
-				{
-					if (xBase >= 0)
-					{
-						x[xBase] = (int)val;
-					}
-					else
-					{
-						Debug.Assert(val == 0);
-					}
-					break;
-				}
-
-				x[xBase] = (int)val;
-			}
-
-			return x;
-		}
-
-		private static long FastExtEuclid(
-			long a,
-			long b,
-			long[] uOut)
-		{
-			long u1 = 1;
-			long u3 = a;
-			long v1 = 0;
-			long v3 = b;
-
-			while (v3 > 0)
-			{
-				long q, tn;
-
-				q = u3 / v3;
-
-				tn = u1 - (v1 * q);
-				u1 = v1;
-				v1 = tn;
-
-				tn = u3 - (v3 * q);
-				u3 = v3;
-				v3 = tn;
-			}
-
-			uOut[0] = u1;
-			uOut[1] = (u3 - (u1 * a)) / b;
-
-			return u3;
-		}
-
-		private static long FastModInverse(
-			long v,
-			long m)
-		{
-			if (m < 1)
-				throw new ArithmeticException("Modulus must be positive");
-
-			long[] x = new long[2];
-			long gcd = FastExtEuclid(v, m, x);
-
-			if (gcd != 1)
-				throw new ArithmeticException("Numbers not relatively prime.");
-
-			if (x[0] < 0)
-			{
-				x[0] += m;
-			}
-
-			return x[0];
-		}
-
-		private long GetMQuote()
-		{
-			Debug.Assert(m_sign > 0);
-
-			if (m_quote != -1)
-			{
-				return m_quote; // already calculated
-			}
-
-			if (m_magnitude.Length == 0 || (m_magnitude[^1] & 1) == 0)
-			{
-				return -1; // not for even numbers
-			}
-
-			long v = ((~m_magnitude[^1]) | 1) & 0xffffffffL;
-			m_quote = FastModInverse(v, 0x100000000L);
-
-			return m_quote;
-		}
-
-		private static void MultiplyMonty(
-			int[] a,
-			int[] x,
-			int[] y,
-			int[] m,
-			long mQuote)
-		// mQuote = -m^(-1) mod b
-		{
-			if (m.Length == 1)
-			{
-				x[0] = (int)MultiplyMontyNIsOne((uint)x[0], (uint)y[0], (uint)m[0], (ulong)mQuote);
-				return;
-			}
-
-			int n = m.Length;
-			int nMinus1 = n - 1;
-			long y_0 = y[nMinus1] & IMASK;
-
-			// 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b} )
-			Array.Clear(a, 0, n + 1);
-
-			// 2. for i from 0 to (n - 1) do the following:
-			for (int i = n; i > 0; i--)
-			{
-				long x_i = x[i - 1] & IMASK;
-
-				// 2.1 u = ((a[0] + (x[i] * y[0]) * mQuote) mod b
-				long u = ((((a[n] & IMASK) + ((x_i * y_0) & IMASK)) & IMASK) * mQuote) & IMASK;
-
-				// 2.2 a = (a + x_i * y + u * m) / b
-				long prod1 = x_i * y_0;
-				long prod2 = u * (m[nMinus1] & IMASK);
-				long tmp = (a[n] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK);
-				long carry = (long)((ulong)prod1 >> 32) + (long)((ulong)prod2 >> 32) + (long)((ulong)tmp >> 32);
-				for (int j = nMinus1; j > 0; j--)
-				{
-					prod1 = x_i * (y[j - 1] & IMASK);
-					prod2 = u * (m[j - 1] & IMASK);
-					tmp = (a[j] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK) + (carry & IMASK);
-					carry = (long)((ulong)carry >> 32) + (long)((ulong)prod1 >> 32) +
-						(long)((ulong)prod2 >> 32) + (long)((ulong)tmp >> 32);
-					a[j + 1] = (int)tmp; // division by b
-				}
-				carry += (a[0] & IMASK);
-				a[1] = (int)carry;
-				a[0] = (int)((ulong)carry >> 32); // OJO!!!!!
-			}
-
-			// 3. if x >= m the x = x - m
-			if (CompareTo(0, a, 0, m) >= 0)
-			{
-				Subtract(0, a, 0, m);
-			}
-
-			// put the result in x
-			Array.Copy(a, 1, x, 0, n);
-		}
-
-		private static uint MultiplyMontyNIsOne(
-			uint x,
-			uint y,
-			uint m,
-			ulong mQuote)
-		{
-			ulong um = m;
-			ulong prod1 = (ulong)x * (ulong)y;
-			ulong u = (prod1 * mQuote) & UIMASK;
-			ulong prod2 = u * um;
-			ulong tmp = (prod1 & UIMASK) + (prod2 & UIMASK);
-			ulong carry = (prod1 >> 32) + (prod2 >> 32) + (tmp >> 32);
-
-			if (carry > um)
-			{
-				carry -= um;
-			}
-
-			return (uint)(carry & UIMASK);
-		}
-
-		public NetBigInteger Modulus(
-			NetBigInteger val)
+		public NetBigInteger Modulus(NetBigInteger val)
 		{
 			return Mod(val);
 		}
 
-		public NetBigInteger Multiply(
-			NetBigInteger val)
+		public NetBigInteger Multiply(NetBigInteger val)
 		{
 			if (m_sign == 0 || val.m_sign == 0)
 				return Zero;
@@ -1577,133 +841,8 @@ namespace HoltronNetworking.Network
 
 			return y;
 		}
-		
-		private int Remainder(
-			int m)
-		{
-			Debug.Assert(m > 0);
 
-			long acc = 0;
-			for (int pos = 0; pos < m_magnitude.Length; ++pos)
-			{
-				long posVal = (uint)m_magnitude[pos];
-				acc = (acc << 32 | posVal) % m;
-			}
-
-			return (int)acc;
-		}
-
-		// return x = x % y - done in place (y value preserved)
-		private int[] Remainder(
-			int[] x,
-			int[] y)
-		{
-			int xStart = 0;
-			while (xStart < x.Length && x[xStart] == 0)
-			{
-				++xStart;
-			}
-
-			int yStart = 0;
-			while (yStart < y.Length && y[yStart] == 0)
-			{
-				++yStart;
-			}
-
-			Debug.Assert(yStart < y.Length);
-
-			int xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
-
-			if (xyCmp > 0)
-			{
-				int yBitLength = CalcBitLength(yStart, y);
-				int xBitLength = CalcBitLength(xStart, x);
-				int shift = xBitLength - yBitLength;
-
-				int[] c;
-				int cStart = 0;
-				int cBitLength = yBitLength;
-				if (shift > 0)
-				{
-					c = ShiftLeft(y, shift);
-					cBitLength += shift;
-					Debug.Assert(c[0] != 0);
-				}
-				else
-				{
-					int len = y.Length - yStart;
-					c = new int[len];
-					Array.Copy(y, yStart, c, 0, len);
-				}
-
-				for (; ; )
-				{
-					if (cBitLength < xBitLength
-						|| CompareNoLeadingZeroes(xStart, x, cStart, c) >= 0)
-					{
-						Subtract(xStart, x, cStart, c);
-
-						while (x[xStart] == 0)
-						{
-							if (++xStart == x.Length)
-								return x;
-						}
-
-						//xBitLength = calcBitLength(xStart, x);
-						xBitLength = 32 * (x.Length - xStart - 1) + BitLen(x[xStart]);
-
-						if (xBitLength <= yBitLength)
-						{
-							if (xBitLength < yBitLength)
-								return x;
-
-							xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
-
-							if (xyCmp <= 0)
-								break;
-						}
-					}
-
-					shift = cBitLength - xBitLength;
-
-					// NB: The case where c[cStart] is 1-bit is harmless
-					if (shift == 1)
-					{
-						uint firstC = (uint)c[cStart] >> 1;
-						uint firstX = (uint)x[xStart];
-						if (firstC > firstX)
-							++shift;
-					}
-
-					if (shift < 2)
-					{
-						c = ShiftRightOneInPlace(cStart, c);
-						--cBitLength;
-					}
-					else
-					{
-						c = ShiftRightInPlace(cStart, c, shift);
-						cBitLength -= shift;
-					}
-
-					//cStart = c.Length - ((cBitLength + 31) / 32);
-					while (c[cStart] == 0)
-					{
-						++cStart;
-					}
-				}
-			}
-
-			if (xyCmp == 0)
-			{
-				Array.Clear(x, xStart, x.Length - xStart);
-			}
-
-			return x;
-		}
-
-		public NetBigInteger Remainder(
-			NetBigInteger n)
+		public NetBigInteger Remainder(NetBigInteger n)
 		{
 			if (n.m_sign == 0)
 				throw new ArithmeticException("Division by zero error");
@@ -1746,76 +885,7 @@ namespace HoltronNetworking.Network
 			return new NetBigInteger(m_sign, result, true);
 		}
 
-		private int[] LastNBits(
-			int n)
-		{
-			if (n < 1)
-				return ZeroMagnitude;
-
-			int numWords = (n + BitsPerInt - 1) / BitsPerInt;
-			numWords = System.Math.Min(numWords, m_magnitude.Length);
-			int[] result = new int[numWords];
-
-			Array.Copy(m_magnitude, m_magnitude.Length - numWords, result, 0, numWords);
-
-			int hiBits = n % 32;
-			if (hiBits != 0)
-			{
-				result[0] &= ~(-1 << hiBits);
-			}
-
-			return result;
-		}
-
-
-		// do a left shift - this returns a new array.
-		private static int[] ShiftLeft(
-			int[] mag,
-			int n)
-		{
-			int nInts = (int)((uint)n >> 5);
-			int nBits = n & 0x1f;
-			int magLen = mag.Length;
-			int[] newMag;
-
-			if (nBits == 0)
-			{
-				newMag = new int[magLen + nInts];
-				mag.CopyTo(newMag, 0);
-			}
-			else
-			{
-				int i = 0;
-				int nBits2 = 32 - nBits;
-				int highBits = (int)((uint)mag[0] >> nBits2);
-
-				if (highBits != 0)
-				{
-					newMag = new int[magLen + nInts + 1];
-					newMag[i++] = highBits;
-				}
-				else
-				{
-					newMag = new int[magLen + nInts];
-				}
-
-				int m = mag[0];
-				for (int j = 0; j < magLen - 1; j++)
-				{
-					int next = mag[j + 1];
-
-					newMag[i++] = (m << nBits) | (int)((uint)next >> nBits2);
-					m = next;
-				}
-
-				newMag[i] = mag[magLen - 1] << nBits;
-			}
-
-			return newMag;
-		}
-
-		public NetBigInteger ShiftLeft(
-			int n)
+		public NetBigInteger ShiftLeft(int n)
 		{
 			if (m_sign == 0 || m_magnitude.Length == 0)
 				return Zero;
@@ -1843,71 +913,7 @@ namespace HoltronNetworking.Network
 			return result;
 		}
 
-		// do a right shift - this does it in place.
-		private static int[] ShiftRightInPlace(
-			int start,
-			int[] mag,
-			int n)
-		{
-			int nInts = (int)((uint)n >> 5) + start;
-			int nBits = n & 0x1f;
-			int magEnd = mag.Length - 1;
-
-			if (nInts != start)
-			{
-				int delta = (nInts - start);
-
-				for (int i = magEnd; i >= nInts; i--)
-				{
-					mag[i] = mag[i - delta];
-				}
-				for (int i = nInts - 1; i >= start; i--)
-				{
-					mag[i] = 0;
-				}
-			}
-
-			if (nBits != 0)
-			{
-				int nBits2 = 32 - nBits;
-				int m = mag[magEnd];
-
-				for (int i = magEnd; i > nInts; --i)
-				{
-					int next = mag[i - 1];
-
-					mag[i] = (int)((uint)m >> nBits) | (next << nBits2);
-					m = next;
-				}
-
-				mag[nInts] = (int)((uint)mag[nInts] >> nBits);
-			}
-
-			return mag;
-		}
-
-		// do a right shift by one - this does it in place.
-		private static int[] ShiftRightOneInPlace(
-			int start,
-			int[] mag)
-		{
-			int i = mag.Length;
-			int m = mag[i - 1];
-
-			while (--i > start)
-			{
-				int next = mag[i - 1];
-				mag[i] = ((int)((uint)m >> 1)) | (next << 31);
-				m = next;
-			}
-
-			mag[start] = (int)((uint)mag[start] >> 1);
-
-			return mag;
-		}
-
-		public NetBigInteger ShiftRight(
-			int n)
+		public NetBigInteger ShiftRight(int n)
 		{
 			if (n == 0)
 				return this;
@@ -1955,48 +961,7 @@ namespace HoltronNetworking.Network
 			return new NetBigInteger(m_sign, res, false);
 		}
 
-		public int SignValue
-		{
-			get { return m_sign; }
-		}
-
-		// returns x = x - y - we assume x is >= y
-		private static int[] Subtract(
-			int xStart,
-			int[] x,
-			int yStart,
-			int[] y)
-		{
-			Debug.Assert(yStart < y.Length);
-			Debug.Assert(x.Length - xStart >= y.Length - yStart);
-
-			int iT = x.Length;
-			int iV = y.Length;
-			long m;
-			int borrow = 0;
-
-			do
-			{
-				m = (x[--iT] & IMASK) - (y[--iV] & IMASK) + borrow;
-				x[iT] = (int)m;
-
-				//				borrow = (m < 0) ? -1 : 0;
-				borrow = (int)(m >> 63);
-			}
-			while (iV > yStart);
-
-			if (borrow != 0)
-			{
-				while (--x[--iT] == -1)
-				{
-				}
-			}
-
-			return x;
-		}
-
-		public NetBigInteger Subtract(
-			NetBigInteger n)
+		public NetBigInteger Subtract(NetBigInteger n)
 		{
 			if (n.m_sign == 0)
 				return this;
@@ -2026,15 +991,6 @@ namespace HoltronNetworking.Network
 			return new NetBigInteger(m_sign * compare, DoSubBigLil(bigun.m_magnitude, lilun.m_magnitude), true);
 		}
 
-		private static int[] DoSubBigLil(
-			int[] bigMag,
-			int[] lilMag)
-		{
-			int[] res = (int[])bigMag.Clone();
-
-			return Subtract(0, res, 0, lilMag);
-		}
-
 		public byte[] ToByteArray()
 		{
 			return ToByteArray(false);
@@ -2045,93 +1001,12 @@ namespace HoltronNetworking.Network
 			return ToByteArray(true);
 		}
 
-		private byte[] ToByteArray(
-			bool unsigned)
-		{
-			if (m_sign == 0)
-				return unsigned ? ZeroEncoding : new byte[1];
-
-			int nBits = (unsigned && m_sign > 0)
-				? BitLength
-				: BitLength + 1;
-
-			int nBytes = GetByteLength(nBits);
-			byte[] bytes = new byte[nBytes];
-
-			int magIndex = m_magnitude.Length;
-			int bytesIndex = bytes.Length;
-
-			if (m_sign > 0)
-			{
-				while (magIndex > 1)
-				{
-					uint mag = (uint)m_magnitude[--magIndex];
-					bytes[--bytesIndex] = (byte)mag;
-					bytes[--bytesIndex] = (byte)(mag >> 8);
-					bytes[--bytesIndex] = (byte)(mag >> 16);
-					bytes[--bytesIndex] = (byte)(mag >> 24);
-				}
-
-				uint lastMag = (uint)m_magnitude[0];
-				while (lastMag > byte.MaxValue)
-				{
-					bytes[--bytesIndex] = (byte)lastMag;
-					lastMag >>= 8;
-				}
-
-				bytes[--bytesIndex] = (byte)lastMag;
-			}
-			else // sign < 0
-			{
-				bool carry = true;
-
-				while (magIndex > 1)
-				{
-					uint mag = ~((uint)m_magnitude[--magIndex]);
-
-					if (carry)
-					{
-						carry = (++mag == uint.MinValue);
-					}
-
-					bytes[--bytesIndex] = (byte)mag;
-					bytes[--bytesIndex] = (byte)(mag >> 8);
-					bytes[--bytesIndex] = (byte)(mag >> 16);
-					bytes[--bytesIndex] = (byte)(mag >> 24);
-				}
-
-				uint lastMag = (uint)m_magnitude[0];
-
-				if (carry)
-				{
-					// Never wraps because magnitude[0] != 0
-					--lastMag;
-				}
-
-				while (lastMag > byte.MaxValue)
-				{
-					bytes[--bytesIndex] = (byte)~lastMag;
-					lastMag >>= 8;
-				}
-
-				bytes[--bytesIndex] = (byte)~lastMag;
-
-				if (bytesIndex > 0)
-				{
-					bytes[--bytesIndex] = byte.MaxValue;
-				}
-			}
-
-			return bytes;
-		}
-
 		public override string ToString()
 		{
 			return ToString(10);
 		}
 
-		public string ToString(
-			int radix)
+		public string ToString(int radix)
 		{
 			switch (radix)
 			{
@@ -2224,45 +1099,7 @@ namespace HoltronNetworking.Network
 			return s;
 		}
 
-		private static NetBigInteger CreateUValueOf(
-			ulong value)
-		{
-			int msw = (int)(value >> 32);
-			int lsw = (int)value;
-
-			if (msw != 0)
-				return new NetBigInteger(1, new int[] { msw, lsw }, false);
-
-			if (lsw != 0)
-			{
-				NetBigInteger n = new(1, new int[] { lsw }, false);
-				// Check for a power of two
-				if ((lsw & -lsw) == lsw)
-				{
-					n.m_numBits = 1;
-				}
-				return n;
-			}
-
-			return Zero;
-		}
-
-		private static NetBigInteger CreateValueOf(
-			long value)
-		{
-			if (value < 0)
-			{
-				if (value == long.MinValue)
-					return CreateValueOf(~value).Not();
-
-				return CreateValueOf(-value).Negate();
-			}
-
-			return CreateUValueOf((ulong)value);
-		}
-
-		public static NetBigInteger ValueOf(
-			long value)
+		public static NetBigInteger ValueOf(long value)
 		{
             return value switch
             {
@@ -2310,8 +1147,7 @@ namespace HoltronNetworking.Network
 			return ((m_magnitude.Length - w) * 32 - (b + 1));
 		}
 
-		public bool TestBit(
-			int n)
+		public bool TestBit(int n)
 		{
 			if (n < 0)
 				throw new ArithmeticException("Bit position must not be negative");
@@ -2325,9 +1161,1068 @@ namespace HoltronNetworking.Network
 
 			int word = m_magnitude[m_magnitude.Length - 1 - wordNum];
 			return ((word >> (n % 32)) & 1) > 0;
-		}
-	}
-	
+        }
+        #endregion
+
+        #region Private Methods
+        // return a = a + b - b preserved.
+        private static int[] AddMagnitudes(int[] a, int[] b)
+        {
+            int tI = a.Length - 1;
+            int vI = b.Length - 1;
+            long m = 0;
+
+            while (vI >= 0)
+            {
+                m += ((long)(uint)a[tI] + (long)(uint)b[vI--]);
+                a[tI--] = (int)m;
+                m = (long)((ulong)m >> 32);
+            }
+
+            if (m != 0)
+            {
+                while (tI >= 0 && ++a[tI--] == 0)
+                {
+                }
+            }
+
+            return a;
+        }
+
+        private NetBigInteger AddToMagnitude(int[] magToAdd)
+        {
+            int[] big, small;
+            if (m_magnitude.Length < magToAdd.Length)
+            {
+                big = magToAdd;
+                small = m_magnitude;
+            }
+            else
+            {
+                big = m_magnitude;
+                small = magToAdd;
+            }
+
+            // Conservatively avoid over-allocation when no overflow possible
+            uint limit = uint.MaxValue;
+            if (big.Length == small.Length)
+                limit -= (uint)small[0];
+
+            bool possibleOverflow = (uint)big[0] >= limit;
+
+            int[] bigCopy;
+            if (possibleOverflow)
+            {
+                bigCopy = new int[big.Length + 1];
+                big.CopyTo(bigCopy, 1);
+            }
+            else
+            {
+                bigCopy = (int[])big.Clone();
+            }
+
+            bigCopy = AddMagnitudes(bigCopy, small);
+
+            return new NetBigInteger(m_sign, bigCopy, possibleOverflow);
+        }
+
+        //
+        // BitLen(value) is the number of bits in value.
+        //
+        private static int BitLen(int w)
+        {
+            // Binary search - decision tree (5 tests, rarely 6)
+            return (w < 1 << 15 ? (w < 1 << 7
+                ? (w < 1 << 3 ? (w < 1 << 1
+                ? (w < 1 << 0 ? (w < 0 ? 32 : 0) : 1)
+                : (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
+                ? (w < 1 << 4 ? 4 : 5)
+                : (w < 1 << 6 ? 6 : 7)))
+                : (w < 1 << 11
+                ? (w < 1 << 9 ? (w < 1 << 8 ? 8 : 9) : (w < 1 << 10 ? 10 : 11))
+                : (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14 ? 14 : 15)))) : (w < 1 << 23 ? (w < 1 << 19
+                ? (w < 1 << 17 ? (w < 1 << 16 ? 16 : 17) : (w < 1 << 18 ? 18 : 19))
+                : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
+                ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
+                : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
+        }
+
+        private int CalcBitLength(int indx, int[] mag)
+        {
+            for (; ; )
+            {
+                if (indx >= mag.Length)
+                    return 0;
+
+                if (mag[indx] != 0)
+                    break;
+
+                ++indx;
+            }
+
+            // bit length for everything after the first int
+            int bitLength = 32 * ((mag.Length - indx) - 1);
+
+            // and determine bitlength of first int
+            int firstMag = mag[indx];
+            bitLength += BitLen(firstMag);
+
+            // Check for negative powers of two
+            if (m_sign < 0 && ((firstMag & -firstMag) == firstMag))
+            {
+                do
+                {
+                    if (++indx >= mag.Length)
+                    {
+                        --bitLength;
+                        break;
+                    }
+                }
+                while (mag[indx] == 0);
+            }
+
+            return bitLength;
+        }
+
+        private static int CompareNoLeadingZeroes(int xIndx, int[] x, int yIndx, int[] y)
+        {
+            int diff = (x.Length - y.Length) - (xIndx - yIndx);
+
+            if (diff != 0)
+            {
+                return diff < 0 ? -1 : 1;
+            }
+
+            // lengths of magnitudes the same, test the magnitude values
+
+            while (xIndx < x.Length)
+            {
+                uint v1 = (uint)x[xIndx++];
+                uint v2 = (uint)y[yIndx++];
+
+                if (v1 != v2)
+                    return v1 < v2 ? -1 : 1;
+            }
+
+            return 0;
+        }
+
+
+        // unsigned comparison on two arrays - note the arrays may
+        // start with leading zeros.
+        private static int CompareTo(int xIndx, int[] x, int yIndx, int[] y)
+        {
+            while (xIndx != x.Length && x[xIndx] == 0)
+            {
+                xIndx++;
+            }
+
+            while (yIndx != y.Length && y[yIndx] == 0)
+            {
+                yIndx++;
+            }
+
+            return CompareNoLeadingZeroes(xIndx, x, yIndx, y);
+        }
+
+        private static NetBigInteger CreateUValueOf(ulong value)
+        {
+            int msw = (int)(value >> 32);
+            int lsw = (int)value;
+
+            if (msw != 0)
+                return new NetBigInteger(1, new int[] { msw, lsw }, false);
+
+            if (lsw != 0)
+            {
+                NetBigInteger n = new(1, new int[] { lsw }, false);
+                // Check for a power of two
+                if ((lsw & -lsw) == lsw)
+                {
+                    n.m_numBits = 1;
+                }
+                return n;
+            }
+
+            return Zero;
+        }
+
+        private static NetBigInteger CreateValueOf(long value)
+        {
+            if (value < 0)
+            {
+                if (value == long.MinValue)
+                    return CreateValueOf(~value).Not();
+
+                return CreateValueOf(-value).Negate();
+            }
+
+            return CreateUValueOf((ulong)value);
+        }
+
+        // return z = x / y - done in place (z value preserved, x contains the remainder)
+        private int[] Divide(int[] x, int[] y)
+        {
+            int xStart = 0;
+            while (xStart < x.Length && x[xStart] == 0)
+            {
+                ++xStart;
+            }
+
+            int yStart = 0;
+            while (yStart < y.Length && y[yStart] == 0)
+            {
+                ++yStart;
+            }
+
+            Debug.Assert(yStart < y.Length);
+
+            int xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
+            int[] count;
+
+            if (xyCmp > 0)
+            {
+                int yBitLength = CalcBitLength(yStart, y);
+                int xBitLength = CalcBitLength(xStart, x);
+                int shift = xBitLength - yBitLength;
+
+                int[] iCount;
+                int iCountStart = 0;
+
+                int[] c;
+                int cStart = 0;
+                int cBitLength = yBitLength;
+                if (shift > 0)
+                {
+                    //					iCount = ShiftLeft(One.magnitude, shift);
+                    iCount = new int[(shift >> 5) + 1];
+                    iCount[0] = 1 << (shift % 32);
+
+                    c = ShiftLeft(y, shift);
+                    cBitLength += shift;
+                }
+                else
+                {
+                    iCount = new int[] { 1 };
+
+                    int len = y.Length - yStart;
+                    c = new int[len];
+                    Array.Copy(y, yStart, c, 0, len);
+                }
+
+                count = new int[iCount.Length];
+
+                for (; ; )
+                {
+                    if (cBitLength < xBitLength
+                        || CompareNoLeadingZeroes(xStart, x, cStart, c) >= 0)
+                    {
+                        Subtract(xStart, x, cStart, c);
+                        AddMagnitudes(count, iCount);
+
+                        while (x[xStart] == 0)
+                        {
+                            if (++xStart == x.Length)
+                                return count;
+                        }
+
+                        //xBitLength = calcBitLength(xStart, x);
+                        xBitLength = 32 * (x.Length - xStart - 1) + BitLen(x[xStart]);
+
+                        if (xBitLength <= yBitLength)
+                        {
+                            if (xBitLength < yBitLength)
+                                return count;
+
+                            xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
+
+                            if (xyCmp <= 0)
+                                break;
+                        }
+                    }
+
+                    shift = cBitLength - xBitLength;
+
+                    // NB: The case where c[cStart] is 1-bit is harmless
+                    if (shift == 1)
+                    {
+                        uint firstC = (uint)c[cStart] >> 1;
+                        uint firstX = (uint)x[xStart];
+                        if (firstC > firstX)
+                            ++shift;
+                    }
+
+                    if (shift < 2)
+                    {
+                        c = ShiftRightOneInPlace(cStart, c);
+                        --cBitLength;
+                        iCount = ShiftRightOneInPlace(iCountStart, iCount);
+                    }
+                    else
+                    {
+                        c = ShiftRightInPlace(cStart, c, shift);
+                        cBitLength -= shift;
+                        iCount = ShiftRightInPlace(iCountStart, iCount, shift);
+                    }
+
+                    //cStart = c.Length - ((cBitLength + 31) / 32);
+                    while (c[cStart] == 0)
+                    {
+                        ++cStart;
+                    }
+
+                    while (iCount[iCountStart] == 0)
+                    {
+                        ++iCountStart;
+                    }
+                }
+            }
+            else
+            {
+                count = new int[1];
+            }
+
+            if (xyCmp == 0)
+            {
+                AddMagnitudes(count, One.m_magnitude);
+                Array.Clear(x, xStart, x.Length - xStart);
+            }
+
+            return count;
+        }
+
+        private static int[] DoSubBigLil(int[] bigMag, int[] lilMag)
+        {
+            int[] res = (int[])bigMag.Clone();
+
+            return Subtract(0, res, 0, lilMag);
+        }
+
+        private static NetBigInteger ExtEuclid(NetBigInteger a, NetBigInteger b, NetBigInteger u1Out, NetBigInteger u2Out)
+        {
+            NetBigInteger u1 = One;
+            NetBigInteger u3 = a;
+            NetBigInteger v1 = Zero;
+            NetBigInteger v3 = b;
+
+            while (v3.m_sign > 0)
+            {
+                NetBigInteger[] q = u3.DivideAndRemainder(v3);
+
+                NetBigInteger tmp = v1.Multiply(q[0]);
+                NetBigInteger tn = u1.Subtract(tmp);
+                u1 = v1;
+                v1 = tn;
+
+                u3 = v3;
+                v3 = q[1];
+            }
+
+            if (u1Out != null)
+            {
+                u1Out.m_sign = u1.m_sign;
+                u1Out.m_magnitude = u1.m_magnitude;
+            }
+
+            if (u2Out != null)
+            {
+                NetBigInteger tmp = u1.Multiply(a);
+                tmp = u3.Subtract(tmp);
+                NetBigInteger res = tmp.Divide(b);
+                u2Out.m_sign = res.m_sign;
+                u2Out.m_magnitude = res.m_magnitude;
+            }
+
+            return u3;
+        }
+
+        private static long FastExtEuclid(long a, long b, long[] uOut)
+        {
+            long u1 = 1;
+            long u3 = a;
+            long v1 = 0;
+            long v3 = b;
+
+            while (v3 > 0)
+            {
+                long q, tn;
+
+                q = u3 / v3;
+
+                tn = u1 - (v1 * q);
+                u1 = v1;
+                v1 = tn;
+
+                tn = u3 - (v3 * q);
+                u3 = v3;
+                v3 = tn;
+            }
+
+            uOut[0] = u1;
+            uOut[1] = (u3 - (u1 * a)) / b;
+
+            return u3;
+        }
+
+        private static long FastModInverse(long v, long m)
+        {
+            if (m < 1)
+                throw new ArithmeticException("Modulus must be positive");
+
+            long[] x = new long[2];
+            long gcd = FastExtEuclid(v, m, x);
+
+            if (gcd != 1)
+                throw new ArithmeticException("Numbers not relatively prime.");
+
+            if (x[0] < 0)
+            {
+                x[0] += m;
+            }
+
+            return x[0];
+        }
+
+        private static int GetByteLength(int nBits)
+        {
+            return (nBits + BitsPerByte - 1) / BitsPerByte;
+        }
+
+        private long GetMQuote()
+        {
+            Debug.Assert(m_sign > 0);
+
+            if (m_quote != -1)
+            {
+                return m_quote; // already calculated
+            }
+
+            if (m_magnitude.Length == 0 || (m_magnitude[^1] & 1) == 0)
+            {
+                return -1; // not for even numbers
+            }
+
+            long v = ((~m_magnitude[^1]) | 1) & 0xffffffffL;
+            m_quote = FastModInverse(v, 0x100000000L);
+
+            return m_quote;
+        }
+
+        private NetBigInteger Inc()
+        {
+            if (m_sign == 0)
+                return One;
+
+            if (m_sign < 0)
+                return new NetBigInteger(-1, DoSubBigLil(m_magnitude, One.m_magnitude), true);
+
+            return AddToMagnitude(One.m_magnitude);
+        }
+
+        private int[] LastNBits(int n)
+        {
+            if (n < 1)
+                return ZeroMagnitude;
+
+            int numWords = (n + BitsPerInt - 1) / BitsPerInt;
+            numWords = System.Math.Min(numWords, m_magnitude.Length);
+            int[] result = new int[numWords];
+
+            Array.Copy(m_magnitude, m_magnitude.Length - numWords, result, 0, numWords);
+
+            int hiBits = n % 32;
+            if (hiBits != 0)
+            {
+                result[0] &= ~(-1 << hiBits);
+            }
+
+            return result;
+        }
+
+        private static int[] MakeMagnitude(byte[] bytes, int offset, int length)
+        {
+            int end = offset + length;
+
+            // strip leading zeros
+            int firstSignificant;
+            for (firstSignificant = offset; firstSignificant < end
+                && bytes[firstSignificant] == 0; firstSignificant++)
+            {
+            }
+
+            if (firstSignificant >= end)
+            {
+                return ZeroMagnitude;
+            }
+
+            int nInts = (end - firstSignificant + 3) / BytesPerInt;
+            int bCount = (end - firstSignificant) % BytesPerInt;
+            if (bCount == 0)
+            {
+                bCount = BytesPerInt;
+            }
+
+            if (nInts < 1)
+            {
+                return ZeroMagnitude;
+            }
+
+            int[] mag = new int[nInts];
+
+            int v = 0;
+            int magnitudeIndex = 0;
+            for (int i = firstSignificant; i < end; ++i)
+            {
+                v <<= 8;
+                v |= bytes[i] & 0xff;
+                bCount--;
+                if (bCount <= 0)
+                {
+                    mag[magnitudeIndex] = v;
+                    magnitudeIndex++;
+                    bCount = BytesPerInt;
+                    v = 0;
+                }
+            }
+
+            if (magnitudeIndex < mag.Length)
+            {
+                mag[magnitudeIndex] = v;
+            }
+
+            return mag;
+        }
+
+        // return x with x = y * z - x is assumed to have enough space.
+        private static int[] Multiply(int[] x, int[] y, int[] z)
+        {
+            int i = z.Length;
+
+            if (i < 1)
+                return x;
+
+            int xBase = x.Length - y.Length;
+
+            for (; ; )
+            {
+                long a = z[--i] & IMASK;
+                long val = 0;
+
+                for (int j = y.Length - 1; j >= 0; j--)
+                {
+                    val += a * (y[j] & IMASK) + (x[xBase + j] & IMASK);
+
+                    x[xBase + j] = (int)val;
+
+                    val = (long)((ulong)val >> 32);
+                }
+
+                --xBase;
+
+                if (i < 1)
+                {
+                    if (xBase >= 0)
+                    {
+                        x[xBase] = (int)val;
+                    }
+                    else
+                    {
+                        Debug.Assert(val == 0);
+                    }
+                    break;
+                }
+
+                x[xBase] = (int)val;
+            }
+
+            return x;
+        }
+
+        // mQuote = -m^(-1) mod b
+        private static void MultiplyMonty(int[] a, int[] x, int[] y, int[] m, long mQuote)
+        {
+            if (m.Length == 1)
+            {
+                x[0] = (int)MultiplyMontyNIsOne((uint)x[0], (uint)y[0], (uint)m[0], (ulong)mQuote);
+                return;
+            }
+
+            int n = m.Length;
+            int nMinus1 = n - 1;
+            long y_0 = y[nMinus1] & IMASK;
+
+            // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b} )
+            Array.Clear(a, 0, n + 1);
+
+            // 2. for i from 0 to (n - 1) do the following:
+            for (int i = n; i > 0; i--)
+            {
+                long x_i = x[i - 1] & IMASK;
+
+                // 2.1 u = ((a[0] + (x[i] * y[0]) * mQuote) mod b
+                long u = ((((a[n] & IMASK) + ((x_i * y_0) & IMASK)) & IMASK) * mQuote) & IMASK;
+
+                // 2.2 a = (a + x_i * y + u * m) / b
+                long prod1 = x_i * y_0;
+                long prod2 = u * (m[nMinus1] & IMASK);
+                long tmp = (a[n] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK);
+                long carry = (long)((ulong)prod1 >> 32) + (long)((ulong)prod2 >> 32) + (long)((ulong)tmp >> 32);
+                for (int j = nMinus1; j > 0; j--)
+                {
+                    prod1 = x_i * (y[j - 1] & IMASK);
+                    prod2 = u * (m[j - 1] & IMASK);
+                    tmp = (a[j] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK) + (carry & IMASK);
+                    carry = (long)((ulong)carry >> 32) + (long)((ulong)prod1 >> 32) +
+                        (long)((ulong)prod2 >> 32) + (long)((ulong)tmp >> 32);
+                    a[j + 1] = (int)tmp; // division by b
+                }
+                carry += (a[0] & IMASK);
+                a[1] = (int)carry;
+                a[0] = (int)((ulong)carry >> 32); // OJO!!!!!
+            }
+
+            // 3. if x >= m the x = x - m
+            if (CompareTo(0, a, 0, m) >= 0)
+            {
+                Subtract(0, a, 0, m);
+            }
+
+            // put the result in x
+            Array.Copy(a, 1, x, 0, n);
+        }
+
+        private static uint MultiplyMontyNIsOne(uint x, uint y, uint m, ulong mQuote)
+        {
+            ulong um = m;
+            ulong prod1 = (ulong)x * (ulong)y;
+            ulong u = (prod1 * mQuote) & UIMASK;
+            ulong prod2 = u * um;
+            ulong tmp = (prod1 & UIMASK) + (prod2 & UIMASK);
+            ulong carry = (prod1 >> 32) + (prod2 >> 32) + (tmp >> 32);
+
+            if (carry > um)
+            {
+                carry -= um;
+            }
+
+            return (uint)(carry & UIMASK);
+        }
+
+        private bool QuickPow2Check()
+        {
+            return m_sign > 0 && m_numBits == 1;
+        }
+
+        private int Remainder(int m)
+        {
+            Debug.Assert(m > 0);
+
+            long acc = 0;
+            for (int pos = 0; pos < m_magnitude.Length; ++pos)
+            {
+                long posVal = (uint)m_magnitude[pos];
+                acc = (acc << 32 | posVal) % m;
+            }
+
+            return (int)acc;
+        }
+
+        // return x = x % y - done in place (y value preserved)
+        private int[] Remainder(int[] x, int[] y)
+        {
+            int xStart = 0;
+            while (xStart < x.Length && x[xStart] == 0)
+            {
+                ++xStart;
+            }
+
+            int yStart = 0;
+            while (yStart < y.Length && y[yStart] == 0)
+            {
+                ++yStart;
+            }
+
+            Debug.Assert(yStart < y.Length);
+
+            int xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
+
+            if (xyCmp > 0)
+            {
+                int yBitLength = CalcBitLength(yStart, y);
+                int xBitLength = CalcBitLength(xStart, x);
+                int shift = xBitLength - yBitLength;
+
+                int[] c;
+                int cStart = 0;
+                int cBitLength = yBitLength;
+                if (shift > 0)
+                {
+                    c = ShiftLeft(y, shift);
+                    cBitLength += shift;
+                    Debug.Assert(c[0] != 0);
+                }
+                else
+                {
+                    int len = y.Length - yStart;
+                    c = new int[len];
+                    Array.Copy(y, yStart, c, 0, len);
+                }
+
+                for (; ; )
+                {
+                    if (cBitLength < xBitLength
+                        || CompareNoLeadingZeroes(xStart, x, cStart, c) >= 0)
+                    {
+                        Subtract(xStart, x, cStart, c);
+
+                        while (x[xStart] == 0)
+                        {
+                            if (++xStart == x.Length)
+                                return x;
+                        }
+
+                        //xBitLength = calcBitLength(xStart, x);
+                        xBitLength = 32 * (x.Length - xStart - 1) + BitLen(x[xStart]);
+
+                        if (xBitLength <= yBitLength)
+                        {
+                            if (xBitLength < yBitLength)
+                                return x;
+
+                            xyCmp = CompareNoLeadingZeroes(xStart, x, yStart, y);
+
+                            if (xyCmp <= 0)
+                                break;
+                        }
+                    }
+
+                    shift = cBitLength - xBitLength;
+
+                    // NB: The case where c[cStart] is 1-bit is harmless
+                    if (shift == 1)
+                    {
+                        uint firstC = (uint)c[cStart] >> 1;
+                        uint firstX = (uint)x[xStart];
+                        if (firstC > firstX)
+                            ++shift;
+                    }
+
+                    if (shift < 2)
+                    {
+                        c = ShiftRightOneInPlace(cStart, c);
+                        --cBitLength;
+                    }
+                    else
+                    {
+                        c = ShiftRightInPlace(cStart, c, shift);
+                        cBitLength -= shift;
+                    }
+
+                    //cStart = c.Length - ((cBitLength + 31) / 32);
+                    while (c[cStart] == 0)
+                    {
+                        ++cStart;
+                    }
+                }
+            }
+
+            if (xyCmp == 0)
+            {
+                Array.Clear(x, xStart, x.Length - xStart);
+            }
+
+            return x;
+        }
+
+        // do a left shift - this returns a new array.
+        private static int[] ShiftLeft(int[] mag, int n)
+        {
+            int nInts = (int)((uint)n >> 5);
+            int nBits = n & 0x1f;
+            int magLen = mag.Length;
+            int[] newMag;
+
+            if (nBits == 0)
+            {
+                newMag = new int[magLen + nInts];
+                mag.CopyTo(newMag, 0);
+            }
+            else
+            {
+                int i = 0;
+                int nBits2 = 32 - nBits;
+                int highBits = (int)((uint)mag[0] >> nBits2);
+
+                if (highBits != 0)
+                {
+                    newMag = new int[magLen + nInts + 1];
+                    newMag[i++] = highBits;
+                }
+                else
+                {
+                    newMag = new int[magLen + nInts];
+                }
+
+                int m = mag[0];
+                for (int j = 0; j < magLen - 1; j++)
+                {
+                    int next = mag[j + 1];
+
+                    newMag[i++] = (m << nBits) | (int)((uint)next >> nBits2);
+                    m = next;
+                }
+
+                newMag[i] = mag[magLen - 1] << nBits;
+            }
+
+            return newMag;
+        }
+
+        // do a right shift - this does it in place.
+        private static int[] ShiftRightInPlace(int start, int[] mag, int n)
+        {
+            int nInts = (int)((uint)n >> 5) + start;
+            int nBits = n & 0x1f;
+            int magEnd = mag.Length - 1;
+
+            if (nInts != start)
+            {
+                int delta = (nInts - start);
+
+                for (int i = magEnd; i >= nInts; i--)
+                {
+                    mag[i] = mag[i - delta];
+                }
+                for (int i = nInts - 1; i >= start; i--)
+                {
+                    mag[i] = 0;
+                }
+            }
+
+            if (nBits != 0)
+            {
+                int nBits2 = 32 - nBits;
+                int m = mag[magEnd];
+
+                for (int i = magEnd; i > nInts; --i)
+                {
+                    int next = mag[i - 1];
+
+                    mag[i] = (int)((uint)m >> nBits) | (next << nBits2);
+                    m = next;
+                }
+
+                mag[nInts] = (int)((uint)mag[nInts] >> nBits);
+            }
+
+            return mag;
+        }
+
+        // do a right shift by one - this does it in place.
+        private static int[] ShiftRightOneInPlace(int start, int[] mag)
+        {
+            int i = mag.Length;
+            int m = mag[i - 1];
+
+            while (--i > start)
+            {
+                int next = mag[i - 1];
+                mag[i] = ((int)((uint)m >> 1)) | (next << 31);
+                m = next;
+            }
+
+            mag[start] = (int)((uint)mag[start] >> 1);
+
+            return mag;
+        }
+
+        // return w with w = x * x - w is assumed to have enough space.
+        private static int[] Square(int[] w, int[] x)
+        {
+            // Note: this method allows w to be only (2 * x.Length - 1) words if result will fit
+            //			if (w.Length != 2 * x.Length)
+            //				throw new ArgumentException("no I don't think so...");
+
+            ulong u1, u2, c;
+
+            int wBase = w.Length - 1;
+
+            for (int i = x.Length - 1; i != 0; i--)
+            {
+                ulong v = (ulong)(uint)x[i];
+
+                u1 = v * v;
+                u2 = u1 >> 32;
+                u1 = (uint)u1;
+
+                u1 += (ulong)(uint)w[wBase];
+
+                w[wBase] = (int)(uint)u1;
+                c = u2 + (u1 >> 32);
+
+                for (int j = i - 1; j >= 0; j--)
+                {
+                    --wBase;
+                    u1 = v * (ulong)(uint)x[j];
+                    u2 = u1 >> 31; // multiply by 2!
+                    u1 = (uint)(u1 << 1); // multiply by 2!
+                    u1 += c + (ulong)(uint)w[wBase];
+
+                    w[wBase] = (int)(uint)u1;
+                    c = u2 + (u1 >> 32);
+                }
+
+                c += (ulong)(uint)w[--wBase];
+                w[wBase] = (int)(uint)c;
+
+                if (--wBase >= 0)
+                {
+                    w[wBase] = (int)(uint)(c >> 32);
+                }
+                else
+                {
+                    Debug.Assert((uint)(c >> 32) == 0);
+                }
+                wBase += i;
+            }
+
+            u1 = (ulong)(uint)x[0];
+            u1 *= u1;
+            u2 = u1 >> 32;
+            u1 &= IMASK;
+
+            u1 += (ulong)(uint)w[wBase];
+
+            w[wBase] = (int)(uint)u1;
+            if (--wBase >= 0)
+            {
+                w[wBase] = (int)(uint)(u2 + (u1 >> 32) + (ulong)(uint)w[wBase]);
+            }
+            else
+            {
+                Debug.Assert((uint)(u2 + (u1 >> 32)) == 0);
+            }
+
+            return w;
+        }
+
+        // returns x = x - y - we assume x is >= y
+        private static int[] Subtract(int xStart, int[] x, int yStart, int[] y)
+        {
+            Debug.Assert(yStart < y.Length);
+            Debug.Assert(x.Length - xStart >= y.Length - yStart);
+
+            int iT = x.Length;
+            int iV = y.Length;
+            long m;
+            int borrow = 0;
+
+            do
+            {
+                m = (x[--iT] & IMASK) - (y[--iV] & IMASK) + borrow;
+                x[iT] = (int)m;
+
+                //				borrow = (m < 0) ? -1 : 0;
+                borrow = (int)(m >> 63);
+            }
+            while (iV > yStart);
+
+            if (borrow != 0)
+            {
+                while (--x[--iT] == -1)
+                {
+                }
+            }
+
+            return x;
+        }
+
+        private byte[] ToByteArray(bool unsigned)
+        {
+            if (m_sign == 0)
+                return unsigned ? ZeroEncoding : new byte[1];
+
+            int nBits = (unsigned && m_sign > 0)
+                ? BitLength
+                : BitLength + 1;
+
+            int nBytes = GetByteLength(nBits);
+            byte[] bytes = new byte[nBytes];
+
+            int magIndex = m_magnitude.Length;
+            int bytesIndex = bytes.Length;
+
+            if (m_sign > 0)
+            {
+                while (magIndex > 1)
+                {
+                    uint mag = (uint)m_magnitude[--magIndex];
+                    bytes[--bytesIndex] = (byte)mag;
+                    bytes[--bytesIndex] = (byte)(mag >> 8);
+                    bytes[--bytesIndex] = (byte)(mag >> 16);
+                    bytes[--bytesIndex] = (byte)(mag >> 24);
+                }
+
+                uint lastMag = (uint)m_magnitude[0];
+                while (lastMag > byte.MaxValue)
+                {
+                    bytes[--bytesIndex] = (byte)lastMag;
+                    lastMag >>= 8;
+                }
+
+                bytes[--bytesIndex] = (byte)lastMag;
+            }
+            else // sign < 0
+            {
+                bool carry = true;
+
+                while (magIndex > 1)
+                {
+                    uint mag = ~((uint)m_magnitude[--magIndex]);
+
+                    if (carry)
+                    {
+                        carry = (++mag == uint.MinValue);
+                    }
+
+                    bytes[--bytesIndex] = (byte)mag;
+                    bytes[--bytesIndex] = (byte)(mag >> 8);
+                    bytes[--bytesIndex] = (byte)(mag >> 16);
+                    bytes[--bytesIndex] = (byte)(mag >> 24);
+                }
+
+                uint lastMag = (uint)m_magnitude[0];
+
+                if (carry)
+                {
+                    // Never wraps because magnitude[0] != 0
+                    --lastMag;
+                }
+
+                while (lastMag > byte.MaxValue)
+                {
+                    bytes[--bytesIndex] = (byte)~lastMag;
+                    lastMag >>= 8;
+                }
+
+                bytes[--bytesIndex] = (byte)~lastMag;
+
+                if (bytesIndex > 0)
+                {
+                    bytes[--bytesIndex] = byte.MaxValue;
+                }
+            }
+
+            return bytes;
+        }
+
+        private static void ZeroOut(int[] x)
+        {
+            Array.Clear(x, 0, x.Length);
+        }
+        #endregion
+    }
+
 #if WINDOWS_RUNTIME
 	internal sealed class Stack
 	{

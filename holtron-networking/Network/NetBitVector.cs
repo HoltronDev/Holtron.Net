@@ -1,12 +1,11 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Fixed size vector of booleans
-	/// </summary>
-	public sealed class NetBitVector
+    /// <summary>
+    /// Fixed size vector of booleans
+    /// </summary>
+    public sealed class NetBitVector
 	{
 		private readonly int m_capacity;
 		private readonly int[] m_data;

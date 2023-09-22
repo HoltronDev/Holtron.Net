@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	// replace with BCL 4.0 Tuple<> when appropriate
-	internal struct NetTuple<A, B>
+    // replace with BCL 4.0 Tuple<> when appropriate
+    internal struct NetTuple<A, B>
 	{
 		public A Item1;
 		public B Item2;

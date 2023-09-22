@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -8,10 +6,10 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Incoming message either sent from a remote peer or generated within the library
-	/// </summary>
-	[DebuggerDisplay("Type={MessageType} LengthBits={LengthBits}")]
+    /// <summary>
+    /// Incoming message either sent from a remote peer or generated within the library
+    /// </summary>
+    [DebuggerDisplay("Type={MessageType} LengthBits={LengthBits}")]
 	public sealed class NetIncomingMessage : NetBuffer
 	{
 		internal NetIncomingMessageType m_incomingMessageType;

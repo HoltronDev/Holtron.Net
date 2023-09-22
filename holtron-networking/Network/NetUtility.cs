@@ -3,21 +3,17 @@ using NetEndPoint = System.Net.IPEndPoint;
 using NetAddress = System.Net.IPAddress;
 #endif
 
-using System;
 using System.Net;
 
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Utility methods
-	/// </summary>
-	public static partial class NetUtility
+    /// <summary>
+    /// Utility methods
+    /// </summary>
+    public static partial class NetUtility
 	{
 		private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
 

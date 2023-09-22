@@ -1,10 +1,6 @@
-﻿using System;
-using System.Net;
-using System.Threading;
+﻿using System.Net;
 using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Net.Sockets;
-using System.Collections.Generic;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -12,7 +8,7 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	public partial class NetPeer
+    public partial class NetPeer
 	{
 		private NetPeerStatus m_status;
 		private Thread m_networkThread;

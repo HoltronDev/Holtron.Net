@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Xml;
+﻿using System.Xml;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -11,10 +8,10 @@ using NetEndPoint = System.Net.IPEndPoint;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Status of the UPnP capabilities
-	/// </summary>
-	public enum UPnPStatus
+    /// <summary>
+    /// Status of the UPnP capabilities
+    /// </summary>
+    public enum UPnPStatus
 	{
 		/// <summary>
 		/// Still discovering UPnP capabilities

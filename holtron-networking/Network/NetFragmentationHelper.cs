@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal static class NetFragmentationHelper
+    internal static class NetFragmentationHelper
 	{
 		internal static int WriteHeader(
 			byte[] destination,

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.Serialization;
+﻿using System.Diagnostics;
 
 namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Exception thrown in the Lidgren Network Library
-	/// </summary>
-	public sealed class NetException : Exception
+    /// <summary>
+    /// Exception thrown in the Lidgren Network Library
+    /// </summary>
+    public sealed class NetException : Exception
 	{
 		/// <summary>
 		/// NetException constructor

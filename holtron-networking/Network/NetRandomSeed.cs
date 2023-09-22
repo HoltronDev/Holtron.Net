@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	/// <summary>
-	/// Class for generating random seeds
-	/// </summary>
-	public static class NetRandomSeed
+    /// <summary>
+    /// Class for generating random seeds
+    /// </summary>
+    public static class NetRandomSeed
 	{
 		private static int m_seedIncrement = -1640531527;
 

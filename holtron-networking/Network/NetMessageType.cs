@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace HoltronNetworking.Network
+﻿namespace HoltronNetworking.Network
 {
-	internal enum NetMessageType : byte
+    internal enum NetMessageType : byte
 	{
 		Unconnected = 0,
 
