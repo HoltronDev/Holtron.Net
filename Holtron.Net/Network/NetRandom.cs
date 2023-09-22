@@ -55,10 +55,10 @@ namespace Holtron.Net.Network
         /// </summary>
         public override float NextSingle()
         {
-            var retval = (float)(REAL_UNIT_INT * NextInt32());
-            if (retval == 1.0f)
+            var ret = (float)(REAL_UNIT_INT * NextInt32());
+            if (ret == 1.0f)
                 return NextSingle();
-            return retval;
+            return ret;
         }
 
         /// <summary>
