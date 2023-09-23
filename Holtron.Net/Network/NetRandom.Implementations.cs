@@ -212,8 +212,7 @@ namespace Holtron.Net.Network
 
         /// <summary>
         /// Generates a random value from UInt32.MinValue to UInt32.MaxValue, inclusively
-        /// </summary>
-        [CLSCompliant(false)]
+        /// </summary
         public override uint NextUInt32()
         {
             var bytes = RandomNumberGenerator.GetBytes(sizeof(uint));
