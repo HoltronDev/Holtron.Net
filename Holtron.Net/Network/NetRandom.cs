@@ -7,6 +7,11 @@ namespace Holtron.Net.Network
     {
         protected const double REAL_UNIT_INT = 1.0 / ((double)int.MaxValue + 1.0);
 
+        /// <summary>
+        /// Same value (usually) as <see cref="int.MaxValue"/>
+        /// </summary>
+        private const uint INT_OFFSET = int.MaxValue;
+
         private uint m_boolValues;
         private int m_nextBoolIndex;
 
@@ -20,8 +25,8 @@ namespace Holtron.Net.Network
         /// </summary>
         public override int Next()
         {
-            var ret = (int)(0x7FFFFFFF & NextUInt32());
-            if (ret == 0x7FFFFFFF)
+            var ret = (int)(INT_OFFSET & NextUInt32());
+            if (ret == INT_OFFSET)
                 return NextInt32();
             return ret;
         }
@@ -31,7 +36,7 @@ namespace Holtron.Net.Network
         /// </summary>
         public int NextInt32()
         {
-            return (int)(0x7FFFFFFF & NextUInt32());
+            return (int)(INT_OFFSET & NextUInt32());
         }
 
         /// <summary>
