@@ -1,4 +1,4 @@
-﻿namespace Holtron.Net.Network
+namespace Holtron.Net.Network
 {
     public partial class NetPeer
 	{
@@ -75,7 +75,7 @@
 				if (m_storagePool.Count >= m_maxCacheCount)
 				{
 					// pool is full; replace randomly chosen entry to keep size distribution
-					var idx = NetRandom.Instance.Next(m_storagePool.Count);
+                    var idx = MultiplyWithCarryRandom.Instance.Next(m_storagePool.Count);
 
 					m_storagePoolBytes -= m_storagePool[idx].Length;
 					m_storagePoolBytes += storage.Length;
