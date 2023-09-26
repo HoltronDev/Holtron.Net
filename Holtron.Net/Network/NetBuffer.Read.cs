@@ -564,51 +564,76 @@ namespace Holtron.Net.Network
 		public string ReadString()
 		{
 			int byteLen = (int)ReadVariableUInt32();
+            if (byteLen <= 0)
+            {
+                return string.Empty;
+            }
 
-			if (byteLen <= 0)
-				return String.Empty;
+            if (m_bitLength - m_readPosition < (byteLen * 8))
+            {
+                return string.Empty;
+            }
 
-			if ((ulong)(m_bitLength - m_readPosition) < ((ulong)byteLen * 8))
-			{
-				// not enough data
-#if DEBUG
-				
-				throw new NetException(c_readOverflowError);
-#else
-				m_readPosition = m_bitLength;
-				return null; // unfortunate; but we need to protect against DDOS
-#endif
-			}
+            if ((m_readPosition & 7) == 0)
+            {
+                // read directly
+                var result1 = Encoding.UTF8.GetString(m_data, m_readPosition >> 3, (int)byteLen);
+                m_readPosition += (8 * (int)byteLen);
+                return result1;
+            }
 
-			if ((m_readPosition & 7) == 0)
-			{
-				// read directly
-				string retval = System.Text.Encoding.UTF8.GetString(m_data, m_readPosition >> 3, byteLen);
-				m_readPosition += (8 * byteLen);
-				return retval;
-			}
+            byte[] bytes;
+            if (ReadBytes((int)byteLen, out bytes) == false)
+            {
+                return string.Empty;
+            }
 
-			if (byteLen <= c_bufferSize) {
-                byte[] buffer = (byte[]) Interlocked.Exchange(ref s_buffer, null) ?? new byte[c_bufferSize];
-                //byte[] buffer = Interlocked.Exchange(ref s_buffer, null) switch
-                //{
-                //    var single when single is NetBuffer => (byte[])single,
-                //    var arr when arr is NetBuffer[] v => v.Aggregate(new List<byte>(), (outBuffer, a) =>
-                //    {
-                //        outBuffer.AddRange((byte[])a);
-                //        return outBuffer;
-                //    }).ToArray(),
-                //    _ => new byte[c_bufferSize],
-                //};
-                ReadBytes(buffer, 0, byteLen);
-				string retval = Encoding.UTF8.GetString(buffer, 0, byteLen);
-				s_buffer = buffer;
-				return retval;
-			} else {
-				byte[] bytes = ReadBytes(byteLen);
-				return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-			}
-		}
+            var result2 = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            return result2;
+            //			if (byteLen <= 0)
+            //				return String.Empty;
+
+            //			if ((ulong)(m_bitLength - m_readPosition) < ((ulong)byteLen * 8))
+            //			{
+            //				// not enough data
+            //#if DEBUG
+
+            //				throw new NetException(c_readOverflowError);
+            //#else
+            //				m_readPosition = m_bitLength;
+            //				return null; // unfortunate; but we need to protect against DDOS
+            //#endif
+            //			}
+
+            //			if ((m_readPosition & 7) == 0)
+            //			{
+            //				// read directly
+            //				string retval = System.Text.Encoding.UTF8.GetString(m_data, m_readPosition >> 3, byteLen);
+            //				m_readPosition += (8 * byteLen);
+            //				return retval;
+            //			}
+
+            //			if (byteLen <= c_bufferSize) {
+            //                byte[] buffer = (byte[]) Interlocked.Exchange(ref s_buffer, null) ?? new byte[c_bufferSize];
+            //                //byte[] buffer = Interlocked.Exchange(ref s_buffer, null) switch
+            //                //{
+            //                //    var single when single is NetBuffer => (byte[])single,
+            //                //    var arr when arr is NetBuffer[] v => v.Aggregate(new List<byte>(), (outBuffer, a) =>
+            //                //    {
+            //                //        outBuffer.AddRange((byte[])a);
+            //                //        return outBuffer;
+            //                //    }).ToArray(),
+            //                //    _ => new byte[c_bufferSize],
+            //                //};
+            //                ReadBytes(buffer, 0, byteLen);
+            //				string retval = Encoding.UTF8.GetString(buffer, 0, byteLen);
+            //				s_buffer = buffer;
+            //				return retval;
+            //			} else {
+            //				byte[] bytes = ReadBytes(byteLen);
+            //				return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            //			}
+        }
 
 		/// <summary>
 		/// Reads a string written using Write(string) and returns true for success
