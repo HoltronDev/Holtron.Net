@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -67,16 +67,6 @@ namespace Holtron.Net.Network
 			m_senderConnection = null;
 			m_bitLength = 0;
 			m_isFragment = false;
-		}
-
-		/// <summary>
-		/// Decrypt a message
-		/// </summary>
-		/// <param name="encryption">The encryption algorithm used to encrypt the message</param>
-		/// <returns>true on success</returns>
-		public bool Decrypt(NetEncryption encryption)
-		{
-			return encryption.Decrypt(this);
 		}
 
 		/// <summary>
