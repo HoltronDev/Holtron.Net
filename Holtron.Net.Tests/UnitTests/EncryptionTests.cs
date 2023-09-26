@@ -1,5 +1,7 @@
 using Holtron.Net.Network;
+using Holtron.Net.Network.Encryption;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Holtron.Net.Tests.UnitTests
 {
@@ -10,37 +12,164 @@ namespace Holtron.Net.Tests.UnitTests
         [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetXorEncryptionTest()
         {
-            RunAlgorithmTest(new NetXorEncryption(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetXorEncryption(_peer, "TopSecret"));
         }
 
-        [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
+        [Fact]//(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetXteaTest()
         {
-            RunAlgorithmTest(new NetXtea(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetXtea(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetEncryptionXtea("TopSecret"));
+            var encryption = new NetEncryptionXtea("TopSecret");
+
+            var outgoingMessage = _peer.CreateMessage();
+            outgoingMessage.Write("Well hello there!");
+            outgoingMessage.Write(42);
+            outgoingMessage.Write(5, 5);
+            outgoingMessage.Write(true);
+            outgoingMessage.Write("General Kenobi!");
+            var unencryptedLength = outgoingMessage.LengthBits;
+
+            var outgoingMessageData = new byte[outgoingMessage.Data.Length];
+            Array.Copy(outgoingMessage.Data, outgoingMessageData, outgoingMessage.Data.Length);
+            encryption.Encrypt(outgoingMessage);
+
+            // Convert to incoming message
+            var incomingMessage = HelperMethods.CreateIncomingMessage(outgoingMessage.PeekDataBuffer(), outgoingMessage.LengthBits);
+
+            Assert.NotNull(incomingMessage);
+            Assert.NotEmpty(incomingMessage.Data);
+
+            encryption.Decrypt(incomingMessage);
+            var incomingMessageData = incomingMessage.Data;
+
+            Assert.Equal(outgoingMessageData, incomingMessageData);
+
+            Assert.NotNull(incomingMessage.Data);
+            Assert.NotEmpty(incomingMessage.Data);
+            Assert.Equal(unencryptedLength, incomingMessage.LengthBits);
+
+            var msgFirstString = incomingMessage.ReadString();
+            var msgFirstInt = incomingMessage.ReadInt32();
+            var msgSecondInt = incomingMessage.ReadInt32(5);
+            var msgBool = incomingMessage.ReadBoolean();
+            var msgSecondString = incomingMessage.ReadString();
+
+            Assert.Equal("Well hello there!", msgFirstString);
+            Assert.Equal(42, msgFirstInt);
+            Assert.Equal(5, msgSecondInt);
+            Assert.True(msgBool);
+            Assert.Equal("General Kenobi!", msgSecondString);
         }
 
-        [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
+        [Fact]//(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetAESEncryptionTest()
         {
-            RunAlgorithmTest(new NetAESEncryption(_peer, "TopSecret"));
+            var encryption = new NetEncryptionAES("TopSecret");
+            //RunAlgorithmTest(encryption);
+
+            var outgoingMessage = _peer.CreateMessage();
+            outgoingMessage.Write("Well hello there!");
+            outgoingMessage.Write(42);
+            outgoingMessage.Write(5, 5);
+            outgoingMessage.Write(true);
+            outgoingMessage.Write("General Kenobi!");
+            var unencryptedLength = outgoingMessage.LengthBits;
+
+            var outgoingMessageData = new byte[outgoingMessage.Data.Length];
+            Array.Copy(outgoingMessage.Data, outgoingMessageData, outgoingMessage.Data.Length);
+            encryption.Encrypt(outgoingMessage);
+
+            // Convert to incoming message
+            var incomingMessage = HelperMethods.CreateIncomingMessage(outgoingMessage.Data, outgoingMessage.LengthBits);
+
+            Assert.NotNull(incomingMessage);
+            Assert.NotEmpty(incomingMessage.Data);
+
+            encryption.Decrypt(incomingMessage);
+            var incomingMessageData = incomingMessage.Data;
+
+            Assert.Equal(outgoingMessageData, incomingMessageData);
+
+            Assert.NotNull(incomingMessage.Data);
+            Assert.NotEmpty(incomingMessage.Data);
+            Assert.Equal(unencryptedLength, incomingMessage.LengthBits);
+
+            var msgFirstString = incomingMessage.ReadString();
+            var msgFirstInt = incomingMessage.ReadInt32();
+            var msgSecondInt = incomingMessage.ReadInt32(5);
+            var msgBool = incomingMessage.ReadBoolean();
+            var msgSecondString = incomingMessage.ReadString();
+
+            Assert.Equal("Well hello there!", msgFirstString);
+            Assert.Equal(42, msgFirstInt);
+            Assert.Equal(5, msgSecondInt);
+            Assert.True(msgBool);
+            Assert.Equal("General Kenobi!", msgSecondString);
+        }
+
+        [Fact]
+        public void NetEncryptionAesGcmTest()
+        {
+            //RunAlgorithmTest(new NetEncryptionAESGCM("TopSecret"));
+            var encryption = new NetEncryptionAESGCM("TopSecret");
+
+            var outgoingMessage = _peer.CreateMessage();
+            outgoingMessage.Write("Well hello there!");
+            outgoingMessage.Write(42);
+            outgoingMessage.Write(5, 5);
+            outgoingMessage.Write(true);
+            outgoingMessage.Write("General Kenobi!");
+            var unencryptedLength = outgoingMessage.LengthBits;
+
+            var outgoingMessageData = new byte[outgoingMessage.Data.Length];
+            Array.Copy(outgoingMessage.Data, outgoingMessageData, outgoingMessage.Data.Length);
+            encryption.Encrypt(outgoingMessage);
+
+            // Convert to incoming message
+            var incomingMessage = HelperMethods.CreateIncomingMessage(outgoingMessage.PeekDataBuffer(), outgoingMessage.LengthBits);
+
+            Assert.NotNull(incomingMessage);
+            Assert.NotEmpty(incomingMessage.Data);
+
+            encryption.Decrypt(incomingMessage);
+            var incomingMessageData = incomingMessage.Data;
+
+            Assert.Equal(outgoingMessageData, incomingMessageData);
+
+            Assert.NotNull(incomingMessage.Data);
+            Assert.NotEmpty(incomingMessage.Data);
+            Assert.Equal(unencryptedLength, incomingMessage.LengthBits);
+
+            var msgFirstString = incomingMessage.ReadString();
+            var msgFirstInt = incomingMessage.ReadInt32();
+            var msgSecondInt = incomingMessage.ReadInt32(5);
+            var msgBool = incomingMessage.ReadBoolean();
+            var msgSecondString = incomingMessage.ReadString();
+
+            Assert.Equal("Well hello there!", msgFirstString);
+            Assert.Equal(42, msgFirstInt);
+            Assert.Equal(5, msgSecondInt);
+            Assert.True(msgBool);
+            Assert.Equal("General Kenobi!", msgSecondString);
         }
 
         [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetRC2EncryptionTest()
         {
-            RunAlgorithmTest(new NetRC2Encryption(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetRC2Encryption(_peer, "TopSecret"));
         }
 
         [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetDESEncryptionTest()
         {
-            RunAlgorithmTest(new NetDESEncryption(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetDESEncryption(_peer, "TopSecret"));
         }
 
         [Fact(Skip = "Test is currenlty failing, will fix in a further issue.")]
         public void NetTripleDESEncryptionTest()
         {
-            RunAlgorithmTest(new NetTripleDESEncryption(_peer, "TopSecret"));
+            //RunAlgorithmTest(new NetTripleDESEncryption(_peer, "TopSecret"));
         }
 
         [Fact]
@@ -83,7 +212,7 @@ namespace Holtron.Net.Tests.UnitTests
             }
         }
 
-        private static void RunAlgorithmTest(NetEncryption encryption)
+        private static void RunAlgorithmTest(INetEncryption encryption)
         {
             var outgoingMessage = _peer.CreateMessage();
             outgoingMessage.Write("Well hello there!");
@@ -93,8 +222,9 @@ namespace Holtron.Net.Tests.UnitTests
             outgoingMessage.Write("General Kenobi!");
             var unencryptedLength = outgoingMessage.LengthBits;
 
-            var outgoingMessageData = outgoingMessage.Data;
-            outgoingMessage.Encrypt(encryption);
+            var outgoingMessageData = new byte[outgoingMessage.Data.Length];
+            Array.Copy(outgoingMessage.Data, outgoingMessageData, outgoingMessage.Data.Length);
+            encryption.Encrypt(outgoingMessage);
 
             // Convert to incoming message
             var incomingMessage = HelperMethods.CreateIncomingMessage(outgoingMessage.PeekDataBuffer(), outgoingMessage.LengthBits);
@@ -102,7 +232,7 @@ namespace Holtron.Net.Tests.UnitTests
             Assert.NotNull(incomingMessage);
             Assert.NotEmpty(incomingMessage.Data);
 
-            incomingMessage.Decrypt(encryption);
+            encryption.Decrypt(incomingMessage);
             var incomingMessageData = incomingMessage.Data;
 
             Assert.Equal(outgoingMessageData, incomingMessageData);

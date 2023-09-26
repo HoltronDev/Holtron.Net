@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -589,8 +589,18 @@ namespace Holtron.Net.Network
 			}
 
 			if (byteLen <= c_bufferSize) {
-				byte[] buffer = (byte[]) Interlocked.Exchange(ref s_buffer, null) ?? new byte[c_bufferSize];
-				ReadBytes(buffer, 0, byteLen);
+                byte[] buffer = (byte[]) Interlocked.Exchange(ref s_buffer, null) ?? new byte[c_bufferSize];
+                //byte[] buffer = Interlocked.Exchange(ref s_buffer, null) switch
+                //{
+                //    var single when single is NetBuffer => (byte[])single,
+                //    var arr when arr is NetBuffer[] v => v.Aggregate(new List<byte>(), (outBuffer, a) =>
+                //    {
+                //        outBuffer.AddRange((byte[])a);
+                //        return outBuffer;
+                //    }).ToArray(),
+                //    _ => new byte[c_bufferSize],
+                //};
+                ReadBytes(buffer, 0, byteLen);
 				string retval = Encoding.UTF8.GetString(buffer, 0, byteLen);
 				s_buffer = buffer;
 				return retval;

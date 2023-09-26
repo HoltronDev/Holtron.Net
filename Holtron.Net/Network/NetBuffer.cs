@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace Holtron.Net.Network
 {
@@ -94,5 +94,7 @@ namespace Holtron.Net.Network
 
 			s_buffer = Array.Empty<NetBuffer>();
 		}
+
+        //public static implicit operator byte[](NetBuffer x) => x.m_data;
 	}
 }
