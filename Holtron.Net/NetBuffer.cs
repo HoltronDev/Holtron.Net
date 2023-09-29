@@ -9,6 +9,8 @@ namespace Holtron.Net
     public interface INetBuffer : IDisposable
     {
         long Length { get; }
+
+        byte[] ToArray();
     }
 
     public class NetBuffer2 : INetBuffer
@@ -65,5 +67,10 @@ namespace Holtron.Net
                 _buffer.Dispose();
             }
         }
+
+        /// <summary>
+        /// Write an array of bytes directly to the underlying stream.
+        /// </summary>
+        protected void WriteToStream(byte[] data) => _buffer.Write(data, 0, data.Length);
     }
 }
