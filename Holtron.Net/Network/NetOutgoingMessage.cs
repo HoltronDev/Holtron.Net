@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace Holtron.Net.Network
 {
@@ -98,14 +98,6 @@ namespace Holtron.Net.Network
 				retval += NetFragmentationHelper.GetFragmentationHeaderSize(m_fragmentGroup, m_fragmentGroupTotalBits / 8, m_fragmentChunkByteSize, m_fragmentChunkNumber);
 			retval += this.LengthBytes;
 			return retval;
-		}
-
-		/// <summary>
-		/// Encrypt this message using the provided algorithm; no more writing can be done before sending it or the message will be corrupt!
-		/// </summary>
-		public bool Encrypt(NetEncryption encryption)
-		{
-			return encryption.Encrypt(this);
 		}
 
 		/// <summary>

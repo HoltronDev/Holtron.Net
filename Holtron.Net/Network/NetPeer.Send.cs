@@ -1,4 +1,4 @@
-﻿#if !__NOIPENDPOINT__
+#if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
 #endif
 

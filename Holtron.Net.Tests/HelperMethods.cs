@@ -1,5 +1,4 @@
-﻿using Holtron.Net.Network;
-using System.Reflection;
+using Holtron.Net.Network;
 
 namespace Holtron.Net.Tests
 {
@@ -13,11 +12,8 @@ namespace Holtron.Net.Tests
                 return null;
             }
 
-            var dataField = typeof(NetIncomingMessage).GetField("m_data", BindingFlags.NonPublic | BindingFlags.Instance);
-            dataField?.SetValue(inc, fromData);
-
-            var bitLengthField = typeof(NetIncomingMessage).GetField("m_bitLength", BindingFlags.NonPublic | BindingFlags.Instance);
-            bitLengthField?.SetValue(inc, bitLength);
+            inc.Data = fromData;
+            inc.LengthBits = bitLength;
 
             return inc;
         }
