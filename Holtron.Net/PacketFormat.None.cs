@@ -11,6 +11,10 @@ namespace Holtron.Net
     {
         public class None : IPacketFormat
         {
+            public static None Instance => LazyInstance.Value;
+
+            private static readonly Lazy<None> LazyInstance = new(() => new None());
+
             public int Encode(byte value, Span<byte> buffer, int offset = 0)
             {
                 buffer[offset] = value;

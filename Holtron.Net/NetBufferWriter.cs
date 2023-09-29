@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Holtron.Net
 {
@@ -29,22 +25,98 @@ namespace Holtron.Net
 
         public int Write(byte value)
         {
-            var bytesWritten = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
-            Interlocked.Add(ref _writeOffset, bytesWritten);
-            Commit(_writeBuffer, ref _writeOffset);
-            return bytesWritten;
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
         }
 
-        public int Write(sbyte value) => Write(unchecked((byte)value));
+        public int Write(sbyte value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
 
         public int Write(ushort value)
         {
-            var bytesWritten = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
-            Interlocked.Add(ref _writeOffset, bytesWritten);
-            Commit(_writeBuffer, ref _writeOffset);
-            return bytesWritten;
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
         }
 
-        public int Write(short value) => Write(unchecked((ushort)value));
+        public int Write(short value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(uint value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(int value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(ulong value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(long value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(Half value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(float value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(double value)
+        {
+            var formattedSize = Format.Encode(value, _writeBuffer.Span.Slice(_writeOffset));
+            Interlocked.Add(ref _writeOffset, formattedSize);
+            CommitPending();
+            return formattedSize;
+        }
+
+        public int Write(byte[] data)
+        {
+            WriteToStream(data);
+            return data.Length;
+        }
+
+        private bool CommitPending() => Commit(_writeBuffer, ref _writeOffset);
     }
 }
