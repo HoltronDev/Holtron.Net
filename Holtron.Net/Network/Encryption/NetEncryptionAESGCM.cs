@@ -9,8 +9,6 @@ namespace Holtron.Net.Network.Encryption
         // https://stackoverflow.com/questions/60889345/using-the-aesgcm-class
         private readonly AesGcm aesGcm;
         private const int KEY_ROUNDS = 200000;
-        private const int NONCE_SIZE = 12; //AesGcm.NonceByteSizes.MinSize
-        private const int TAG_SIZE = 12; //AesGcm.TagByteSizes.MinSize
 
         public NetEncryptionAESGCM(string key) :
             this(Encoding.UTF8.GetBytes(key))
@@ -34,9 +32,9 @@ namespace Holtron.Net.Network.Encryption
             var unencryptedLengthBits = (int)message.ReadUInt32();
             var encryptedDataLength = message.ReadInt32();
             var encryptedData = message.ReadBytes(encryptedDataLength).AsSpan();
-            var nonce = encryptedData[..NONCE_SIZE];
-            var tag = encryptedData.Slice(NONCE_SIZE, TAG_SIZE);
-            var cipherText = encryptedData[(NONCE_SIZE + TAG_SIZE)..];
+            var nonce = encryptedData[..AesGcm.NonceByteSizes.MinSize];
+            var tag = encryptedData.Slice(AesGcm.NonceByteSizes.MinSize, AesGcm.TagByteSizes.MinSize);
+            var cipherText = encryptedData[(AesGcm.NonceByteSizes.MinSize + AesGcm.TagByteSizes.MinSize)..];
             var plainTextMessage = new byte[cipherText.Length];
 
             aesGcm.Decrypt(nonce, cipherText, tag, plainTextMessage);
@@ -60,15 +58,15 @@ namespace Holtron.Net.Network.Encryption
             message.m_data.CopyTo(bytesToEncrypt, 0);
             var unencryptedLengthBits = message.LengthBits;
 
-            var encryptedDataLength = NONCE_SIZE + TAG_SIZE + bytesToEncrypt.Length;
+            var encryptedDataLength = AesGcm.NonceByteSizes.MinSize + AesGcm.TagByteSizes.MinSize + bytesToEncrypt.Length;
 
             Span<byte> encryptedData = encryptedDataLength < 1024
                 ? stackalloc byte[encryptedDataLength]
                 : new byte[encryptedDataLength].AsSpan();
 
-            var nonce = encryptedData[..NONCE_SIZE];
-            var tag = encryptedData.Slice(NONCE_SIZE, TAG_SIZE);
-            var cipherBytes = encryptedData.Slice(NONCE_SIZE + TAG_SIZE, bytesToEncrypt.Length);
+            var nonce = encryptedData[..AesGcm.NonceByteSizes.MinSize];
+            var tag = encryptedData.Slice(AesGcm.NonceByteSizes.MinSize, AesGcm.TagByteSizes.MinSize);
+            var cipherBytes = encryptedData.Slice(AesGcm.NonceByteSizes.MinSize + AesGcm.TagByteSizes.MinSize, bytesToEncrypt.Length);
 
             RandomNumberGenerator.Fill(nonce);
 
