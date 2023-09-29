@@ -1,6 +1,6 @@
 namespace Holtron.Net.Network.Encryption
 {
-    public interface INetEncryption
+    public interface INetEncryption : IDisposable
     {
         /// <summary>
         /// Decrypt a message after recieving it.
