@@ -24,7 +24,8 @@ namespace Holtron.Net.Network.Encryption
         {
             var salt = new byte[8];
             RandomNumberGenerator.Fill(salt);
-            var derivedKey = new Rfc2898DeriveBytes(key, salt, KEY_ROUNDS).GetBytes(16);
+            using var deriveBytes = new Rfc2898DeriveBytes(key, salt, KEY_ROUNDS);
+            var derivedKey = deriveBytes.GetBytes(16);
             aesGcm = new AesGcm(derivedKey);
         }
 
