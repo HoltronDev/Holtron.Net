@@ -317,8 +317,9 @@ namespace Holtron.Net.Tests.UnitTests
         public void BufferCanWriteBasicString(Type packetFormat, string str)
         {
             using var sut = CreateTestBuffer(packetFormat);
+            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
             var sizeWritten = sut.Writer.Write(str);
-            Assert.Equal(str.Length, sizeWritten);
+            Assert.Equal(expectedSize, sizeWritten);
 
             var output = sut.ToArray();
             var outStr = sut.Format.StringEncoding.GetString(output);
@@ -333,8 +334,9 @@ namespace Holtron.Net.Tests.UnitTests
             var str = GenerateRandomString(8 * DataSize.KILOBYTE);
 
             using var sut = CreateTestBuffer(packetFormat);
+            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
             var sizeWritten = sut.Writer.Write(str);
-            Assert.Equal(str.Length, sizeWritten);
+            Assert.Equal(expectedSize, sizeWritten);
 
             var output = sut.ToArray();
             var outStr = sut.Format.StringEncoding.GetString(output);
@@ -348,8 +350,9 @@ namespace Holtron.Net.Tests.UnitTests
         public void BufferCanWriteStringWithUnicode(Type packetFormat, string str)
         {
             using var sut = CreateTestBuffer(packetFormat);
+            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
             var sizeWritten = sut.Writer.Write(str);
-            Assert.Equal(str.Length, sizeWritten);
+            Assert.Equal(expectedSize, sizeWritten);
 
             var output = sut.ToArray();
             var outStr = sut.Format.StringEncoding.GetString(output);

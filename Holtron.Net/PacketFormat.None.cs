@@ -16,7 +16,7 @@ namespace Holtron.Net
 
             private static readonly Lazy<None> LazyInstance = new(() => new None());
 
-            public Encoding StringEncoding { get; } = new ASCIIEncoding();
+            public Encoding StringEncoding { get; } = new UTF8Encoding(false);
 
             public int DecodeByte(MemoryStream buffer, Span<byte> readBuffer, out byte value)
             {
@@ -207,9 +207,6 @@ namespace Holtron.Net
 
             public int Encode(string str, Span<byte> buffer, int offset = 0)
             {
-                if (buffer.Length < str.Length)
-                    return 0;
-
                 return StringEncoding.GetBytes(str, buffer.Slice(offset));
             }
         }
