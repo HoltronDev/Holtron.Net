@@ -1,3 +1,5 @@
+using System.Formats.Asn1;
+
 namespace Holtron.Net.Tests.UnitTests
 {
     public class NetBuffer2Tests
@@ -123,6 +125,32 @@ namespace Holtron.Net.Tests.UnitTests
             using var sut = CreateTestBuffer(packetFormat, data);
             var result = sut.Reader.ReadDouble();
             Assert.Equal(value, result);
+        }
+
+        [Theory]
+        [InlineData(typeof(PacketFormat.None))]
+        public void BufferCanReadByteArray(Type packetFormat)
+        {
+            var data = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
+
+            using var sut = CreateTestBuffer(packetFormat, data);
+            var result = new byte[data.Length];
+            sut.Reader.ReadBytes(result, 4);
+
+            Assert.Equal(data, result);
+        }
+
+        [Theory]
+        [InlineData(typeof(PacketFormat.None))]
+        public void BufferCanReadByteArrayToSpan(Type packetFormat)
+        {
+            var data = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
+
+            using var sut = CreateTestBuffer(packetFormat, data);
+            var result = new Memory<byte>(new byte[8]);
+            sut.Reader.ReadBytes(result.Span);
+
+            Assert.Equal(result.Slice(0, 4).ToArray(), data);
         }
 
         [Theory]

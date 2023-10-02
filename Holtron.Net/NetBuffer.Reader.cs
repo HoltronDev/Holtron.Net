@@ -8,8 +8,6 @@ namespace Holtron.Net
 
             private readonly Memory<byte> _readBuffer = new(new byte[8 * DataSize.KILOBYTE]);
 
-            private int _readOffset;
-
             public BufferReader(NetBuffer2 buffer)
             {
                 _buffer = buffer;
@@ -79,6 +77,18 @@ namespace Holtron.Net
             {
                 _ = _buffer.Format.DecodeDouble(_buffer._buffer, _readBuffer.Span, out var value);
                 return value;
+            }
+
+            public int ReadBytes(byte[] buffer, int size)
+            {
+                var bytesRead = _buffer._buffer.Read(buffer, 0, size);
+                return bytesRead;
+            }
+
+            public int ReadBytes(Span<byte> buffer)
+            {
+                var bytesRead = _buffer._buffer.Read(buffer);
+                return bytesRead;
             }
         }
     }
