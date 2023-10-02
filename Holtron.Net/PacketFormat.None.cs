@@ -111,6 +111,12 @@ namespace Holtron.Net
                 return bytesRead;
             }
 
+            public int DecodeString(MemoryStream buffer, Span<byte> readBuffer, out string value)
+            {
+                value = "";
+                return 0;
+            }
+
             public int Encode(byte value, Span<byte> buffer, int offset = 0)
             {
                 buffer[offset] = value;

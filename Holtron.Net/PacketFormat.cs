@@ -31,6 +31,8 @@ namespace Holtron.Net
 
         int DecodeDouble(MemoryStream buffer, Span<byte> readBuffer, out double value);
 
+        int DecodeString(MemoryStream buffer, Span<byte> readBuffer, out string value);
+
         int Encode(byte value, Span<byte> buffer, int offset = 0);
 
         int Encode(sbyte value, Span<byte> buffer, int offset = 0);
