@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Text;
 
 namespace Holtron.Net
 {
@@ -14,6 +15,8 @@ namespace Holtron.Net
             public static None Instance => LazyInstance.Value;
 
             private static readonly Lazy<None> LazyInstance = new(() => new None());
+
+            public Encoding StringEncoding { get; } = new ASCIIEncoding();
 
             public int DecodeByte(MemoryStream buffer, Span<byte> readBuffer, out byte value)
             {
@@ -200,6 +203,14 @@ namespace Holtron.Net
 
                 BinaryPrimitives.WriteDoubleLittleEndian(buffer, value);
                 return sizeof(double);
+            }
+
+            public int Encode(string str, Span<byte> buffer, int offset = 0)
+            {
+                if (buffer.Length < str.Length)
+                    return 0;
+
+                return StringEncoding.GetBytes(str, buffer.Slice(offset));
             }
         }
     }

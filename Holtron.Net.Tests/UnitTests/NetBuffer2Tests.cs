@@ -1,9 +1,18 @@
-using System.Formats.Asn1;
+using System.Security.Cryptography;
+using System.Text;
+using Xunit.Abstractions;
 
 namespace Holtron.Net.Tests.UnitTests
 {
     public class NetBuffer2Tests
     {
+        private ITestOutputHelper Output { get; }
+
+        public NetBuffer2Tests(ITestOutputHelper output)
+        {
+            Output = output;
+        }
+
         [Theory]
         [InlineData(typeof(PacketFormat.None), 200)]
         public void BufferCanReadByte(Type packetFormat, byte value)
@@ -302,6 +311,51 @@ namespace Holtron.Net.Tests.UnitTests
             Assert.Equal(testData.Length, output.Length);
         }
 
+        [Theory]
+        [InlineData(typeof(PacketFormat.None), "test")]
+        [InlineData(typeof(PacketFormat.None), "The quick brown fox jumped over the lazy dog.")]
+        public void BufferCanWriteBasicString(Type packetFormat, string str)
+        {
+            using var sut = CreateTestBuffer(packetFormat);
+            var sizeWritten = sut.Writer.Write(str);
+            Assert.Equal(str.Length, sizeWritten);
+
+            var output = sut.ToArray();
+            var outStr = sut.Format.StringEncoding.GetString(output);
+            Assert.Equal(str, outStr);
+        }
+
+        [Theory]
+        [InlineData(typeof(PacketFormat.None))]
+        public void BufferCanWriteLargeString(Type packetFormat)
+        {
+            // Generate a string that should be large enough to fill the underlying write buffer.
+            var str = GenerateRandomString(8 * DataSize.KILOBYTE);
+
+            using var sut = CreateTestBuffer(packetFormat);
+            var sizeWritten = sut.Writer.Write(str);
+            Assert.Equal(str.Length, sizeWritten);
+
+            var output = sut.ToArray();
+            var outStr = sut.Format.StringEncoding.GetString(output);
+            Assert.Equal(str, outStr);
+        }
+
+        [Theory]
+        [InlineData(typeof(PacketFormat.None), "これは日本語です。")]
+        [InlineData(typeof(PacketFormat.None), "اللغة العربية هي لغة جيدة للاختبار من اليمين إلى اليسار.")]
+        [InlineData(typeof(PacketFormat.None), "Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
+        public void BufferCanWriteStringWithUnicode(Type packetFormat, string str)
+        {
+            using var sut = CreateTestBuffer(packetFormat);
+            var sizeWritten = sut.Writer.Write(str);
+            Assert.Equal(str.Length, sizeWritten);
+
+            var output = sut.ToArray();
+            var outStr = sut.Format.StringEncoding.GetString(output);
+            Assert.Equal(str, outStr);
+        }
+
         private NetBuffer2 CreateTestBuffer() => CreateTestBuffer(PacketFormat.None.Instance);
 
         private NetBuffer2 CreateTestBuffer(Type packetFormat) => packetFormat switch
@@ -317,5 +371,13 @@ namespace Holtron.Net.Tests.UnitTests
         {
             _ => CreateTestBuffer(PacketFormat.None.Instance, data),
         };
+
+        private string GenerateRandomString(int size)
+        {
+            var str = new StringBuilder(size);
+            for (var c = 0; c < size; c++)
+                str.Append((char)RandomNumberGenerator.GetInt32(97, 123));
+            return str.ToString();
+        }
     }
 }

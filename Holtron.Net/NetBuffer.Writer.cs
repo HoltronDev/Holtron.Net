@@ -109,6 +109,14 @@ namespace Holtron.Net
                 return data.Length;
             }
 
+            public int Write(string str)
+            {
+                var formattedSize = _buffer.Format.Encode(str, _writeBuffer.Span.Slice(_writeOffset));
+                Interlocked.Add(ref _writeOffset, formattedSize);
+                CommitPending();
+                return formattedSize;
+            }
+
             private bool CommitPending() => _buffer.Commit(_writeBuffer, ref _writeOffset);
         }
     }

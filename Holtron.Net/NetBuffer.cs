@@ -2,6 +2,8 @@ namespace Holtron.Net
 {
     public interface INetBuffer : IDisposable
     {
+        IPacketFormat Format { get; }
+
         long Length { get; }
 
         byte[] ToArray();
@@ -11,11 +13,11 @@ namespace Holtron.Net
     {
         public long Length => _buffer.Length;
 
+        public IPacketFormat Format { get; }
+
         public BufferReader Reader { get; }
 
         public BufferWriter Writer { get; }
-
-        protected IPacketFormat Format { get; }
 
         private readonly MemoryStream _buffer;
 

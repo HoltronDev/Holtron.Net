@@ -1,7 +1,14 @@
+using System.Text;
+
 namespace Holtron.Net
 {
     public interface IPacketFormat
     {
+        /// <summary>
+        /// The encoding format to use for strings when they're converted directly to bytes for transport.
+        /// </summary>
+        Encoding StringEncoding { get; }
+
         int DecodeByte(MemoryStream buffer, Span<byte> readBuffer, out byte value);
 
         int DecodeSByte(MemoryStream buffer, Span<byte> readBuffer, out sbyte value);
@@ -45,6 +52,8 @@ namespace Holtron.Net
         int Encode(float value, Span<byte> buffer, int offset = 0);
 
         int Encode(double value, Span<byte> buffer, int offset = 0);
+
+        int Encode(string str, Span<byte> buffer, int offset = 0);
     }
 
     public static partial class PacketFormat
