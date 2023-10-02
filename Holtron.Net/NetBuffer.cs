@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Holtron.Net
 {
     public interface INetBuffer : IDisposable
@@ -13,13 +7,17 @@ namespace Holtron.Net
         byte[] ToArray();
     }
 
-    public class NetBuffer2 : INetBuffer
+    public partial class NetBuffer2 : INetBuffer
     {
         public long Length => _buffer.Length;
 
+        public BufferReader Reader { get; }
+
+        public BufferWriter Writer { get; }
+
         protected IPacketFormat Format { get; }
 
-        private MemoryStream _buffer;
+        private readonly MemoryStream _buffer;
 
         public NetBuffer2()
             : this(new PacketFormat.None())
@@ -30,12 +28,16 @@ namespace Holtron.Net
         {
             _buffer = new MemoryStream();
             Format = packetFormat;
+            Reader = new BufferReader(this);
+            Writer = new BufferWriter(this);
         }
 
         public NetBuffer2(IPacketFormat packetFormat, byte[] data)
         {
             _buffer = new MemoryStream(data);
             Format = packetFormat;
+            Reader = new BufferReader(this);
+            Writer = new BufferWriter(this);
         }
 
         ~NetBuffer2()
