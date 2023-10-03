@@ -226,10 +226,10 @@ namespace Holtron.Net
                     // to get convert the size of the string into a byte array
                     var dataLen = new[]
                     {
-                        (byte)(sizeBytes >> 24),
-                        (byte)(sizeBytes >> 16),
-                        (byte)(sizeBytes >> 8),
                         (byte)(sizeBytes),
+                        (byte)(sizeBytes >> 8),
+                        (byte)(sizeBytes >> 16),
+                        (byte)(sizeBytes >> 24),
                     };
                     sizeBytes += dataLen.Length;
                     stream.Write(dataLen);
