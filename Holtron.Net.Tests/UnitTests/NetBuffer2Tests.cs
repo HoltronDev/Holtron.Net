@@ -312,11 +312,11 @@ namespace Holtron.Net.Tests.UnitTests
         }
 
         [Theory]
-        [InlineData(typeof(PacketFormat.None), "test")]
-        [InlineData(typeof(PacketFormat.None), "The quick brown fox jumped over the lazy dog.")]
-        public void BufferCanWriteBasicString(Type packetFormat, string str)
+        [InlineData("test")]
+        [InlineData("The quick brown fox jumped over the lazy dog.")]
+        public void BufferCanWriteBasicString(string str)
         {
-            using var sut = CreateTestBuffer(packetFormat);
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
@@ -326,14 +326,13 @@ namespace Holtron.Net.Tests.UnitTests
             Assert.Equal(str, outStr);
         }
 
-        [Theory]
-        [InlineData(typeof(PacketFormat.None))]
-        public void BufferCanWriteLargeString(Type packetFormat)
+        [Fact]
+        public void BufferCanWriteLargeString()
         {
             // Generate a string that should be large enough to fill the underlying write buffer.
             var str = GenerateRandomString(10 * DataSize.KILOBYTE);
 
-            using var sut = CreateTestBuffer(packetFormat);
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
@@ -344,17 +343,21 @@ namespace Holtron.Net.Tests.UnitTests
         }
 
         [Theory]
-        [InlineData(typeof(PacketFormat.None), "これは日本語です。")]
-        [InlineData(typeof(PacketFormat.None), "اللغة العربية هي لغة جيدة للاختبار من اليمين إلى اليسار.")]
-        [InlineData(typeof(PacketFormat.None), "Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
-        public void BufferCanWriteStringWithUnicode(Type packetFormat, string str)
+        [InlineData("これは日本語です。")]
+        [InlineData("اللغة العربية هي لغة جيدة للاختبار من اليمين إلى اليسار.")]
+        [InlineData("Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
+        public void BufferCanWriteStringWithUnicode(string str)
         {
-            using var sut = CreateTestBuffer(packetFormat);
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
 
             var output = sut.ToArray().AsSpan();
+            var outSizeBytes = output.Slice(0, sizeof(uint));
+            var outSize = BitConverter.ToUInt32(outSizeBytes);
+            Assert.Equal((uint)(expectedSize - sizeof(uint)), outSize);
+
             var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
             Assert.Equal(str, outStr);
         }
