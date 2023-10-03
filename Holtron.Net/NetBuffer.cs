@@ -6,6 +6,13 @@ namespace Holtron.Net
 
         long Length { get; }
 
+        /// <summary>
+        /// Provides a way to call Seek on the underlying stream.
+        /// This method will return 0 and have no effect if Seek cannot
+        /// be used with the underlying stream.
+        /// </summary>
+        long Seek(long offset, SeekOrigin origin);
+
         byte[] ToArray();
     }
 
@@ -51,6 +58,15 @@ namespace Holtron.Net
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc cref="INetBuffer.Seek"/>
+        public long Seek(long offset, SeekOrigin origin)
+        {
+            if (!_buffer.CanRead)
+                return 0L;
+
+            return _buffer.Seek(offset, origin);
         }
 
         public byte[] ToArray() => _buffer.ToArray();

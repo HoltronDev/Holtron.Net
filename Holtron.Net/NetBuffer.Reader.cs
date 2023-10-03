@@ -88,6 +88,12 @@ namespace Holtron.Net
                 var bytesRead = _buffer._buffer.Read(buffer);
                 return bytesRead;
             }
+
+            public string ReadString()
+            {
+                _ = _buffer.Format.DecodeString(_buffer._buffer, out var str);
+                return str;
+            }
         }
     }
 }

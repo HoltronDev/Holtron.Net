@@ -115,8 +115,28 @@ namespace Holtron.Net
 
             public int DecodeString(MemoryStream buffer, out string value)
             {
-                value = "";
-                return 0;
+                // First 4 bytes should contain the size of the string.
+                var strSizeBytes = new byte[sizeof(uint)];
+                _ = buffer.Read(strSizeBytes, 0, strSizeBytes.Length);
+
+                var strSize = BinaryPrimitives.ReadUInt32LittleEndian(strSizeBytes.AsSpan());
+                // If the local read buffer is large enough to hold the incoming string, we'll
+                // just want to use that rather than creating a temporary buffer just for reading
+                // this one string.
+                int bytesRead;
+                if (strSize < _readBuffer.Length)
+                {
+                    bytesRead = buffer.Read(_readBuffer.Span);
+                    value = StringEncoding.GetString(_readBuffer.Span[..bytesRead]);
+                }
+                else
+                {
+                    var tmp = new byte[strSize].AsSpan();
+                    bytesRead = buffer.Read(tmp);
+                    value = StringEncoding.GetString(tmp);
+                }
+
+                return (int)(strSize + bytesRead);
             }
 
             public int Encode(byte value, Span<byte> buffer, int offset = 0)

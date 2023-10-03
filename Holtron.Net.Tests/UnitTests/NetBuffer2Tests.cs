@@ -163,6 +163,47 @@ namespace Holtron.Net.Tests.UnitTests
         }
 
         [Theory]
+        [InlineData("test")]
+        [InlineData("The quick brown fox jumped over the lazy dog.")]
+        public void BufferCanReadBasicString(string str)
+        {
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            sut.Writer.Write(str);
+            sut.Seek(0, SeekOrigin.Begin);
+
+            var actual = sut.Reader.ReadString();
+            Assert.Equal(str, actual);
+        }
+
+        [Fact]
+        public void BufferCanReadLargeString()
+        {
+            // Generate a string that should be large enough to fill the underlying read buffer.
+            var str = GenerateRandomString(10 * DataSize.KILOBYTE);
+
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            sut.Writer.Write(str);
+            sut.Seek(0, SeekOrigin.Begin);
+
+            var actual = sut.Reader.ReadString();
+            Assert.Equal(str, actual);
+        }
+
+        [Theory]
+        [InlineData("これは日本語です。")]
+        [InlineData("اللغة العربية هي لغة جيدة للاختبار من اليمين إلى اليسار.")]
+        [InlineData("Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
+        public void BufferCanReadStringWithUnicode(string str)
+        {
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            sut.Writer.Write(str);
+            sut.Seek(0, SeekOrigin.Begin);
+
+            var actual = sut.Reader.ReadString();
+            Assert.Equal(str, actual);
+        }
+
+        [Theory]
         [InlineData(typeof(PacketFormat.None), 255, sizeof(byte))]
         public void BufferCanWriteByte(Type packetFormat, byte value, int expectedSizeWritten)
         {
@@ -361,8 +402,6 @@ namespace Holtron.Net.Tests.UnitTests
             var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
             Assert.Equal(str, outStr);
         }
-
-        private NetBuffer2 CreateTestBuffer() => CreateTestBuffer(PacketFormat.None.Instance);
 
         private NetBuffer2 CreateTestBuffer(Type packetFormat) => packetFormat switch
         {
