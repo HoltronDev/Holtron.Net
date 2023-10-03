@@ -317,12 +317,12 @@ namespace Holtron.Net.Tests.UnitTests
         public void BufferCanWriteBasicString(Type packetFormat, string str)
         {
             using var sut = CreateTestBuffer(packetFormat);
-            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
+            var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
 
-            var output = sut.ToArray();
-            var outStr = sut.Format.StringEncoding.GetString(output);
+            var output = sut.ToArray().AsSpan();
+            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
             Assert.Equal(str, outStr);
         }
 
@@ -331,15 +331,15 @@ namespace Holtron.Net.Tests.UnitTests
         public void BufferCanWriteLargeString(Type packetFormat)
         {
             // Generate a string that should be large enough to fill the underlying write buffer.
-            var str = GenerateRandomString(8 * DataSize.KILOBYTE);
+            var str = GenerateRandomString(10 * DataSize.KILOBYTE);
 
             using var sut = CreateTestBuffer(packetFormat);
-            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
+            var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
 
-            var output = sut.ToArray();
-            var outStr = sut.Format.StringEncoding.GetString(output);
+            var output = sut.ToArray().AsSpan();
+            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
             Assert.Equal(str, outStr);
         }
 
@@ -350,12 +350,12 @@ namespace Holtron.Net.Tests.UnitTests
         public void BufferCanWriteStringWithUnicode(Type packetFormat, string str)
         {
             using var sut = CreateTestBuffer(packetFormat);
-            var expectedSize = sut.Format.StringEncoding.GetByteCount(str);
+            var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
 
-            var output = sut.ToArray();
-            var outStr = sut.Format.StringEncoding.GetString(output);
+            var output = sut.ToArray().AsSpan();
+            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
             Assert.Equal(str, outStr);
         }
 

@@ -111,10 +111,10 @@ namespace Holtron.Net
 
             public int Write(string str)
             {
-                var formattedSize = _buffer.Format.Encode(str, _writeBuffer.Span.Slice(_writeOffset));
-                Interlocked.Add(ref _writeOffset, formattedSize);
-                CommitPending();
-                return formattedSize;
+                if (string.IsNullOrEmpty(str))
+                    return 0;
+
+                return _buffer.Format.Encode(str, _buffer._buffer);
             }
 
             private bool CommitPending() => _buffer.Commit(_writeBuffer, ref _writeOffset);

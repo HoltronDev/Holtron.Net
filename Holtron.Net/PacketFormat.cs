@@ -9,29 +9,29 @@ namespace Holtron.Net
         /// </summary>
         Encoding StringEncoding { get; }
 
-        int DecodeByte(MemoryStream buffer, Span<byte> readBuffer, out byte value);
+        int DecodeByte(MemoryStream buffer, out byte value);
 
-        int DecodeSByte(MemoryStream buffer, Span<byte> readBuffer, out sbyte value);
+        int DecodeSByte(MemoryStream buffer, out sbyte value);
 
-        int DecodeUInt16(MemoryStream buffer, Span<byte> readBuffer, out ushort value);
+        int DecodeUInt16(MemoryStream buffer, out ushort value);
 
-        int DecodeInt16(MemoryStream buffer, Span<byte> readBuffer, out short value);
+        int DecodeInt16(MemoryStream buffer, out short value);
 
-        int DecodeUInt32(MemoryStream buffer, Span<byte> readBuffer, out uint value);
+        int DecodeUInt32(MemoryStream buffer, out uint value);
 
-        int DecodeInt32(MemoryStream buffer, Span<byte> readBuffer, out int value);
+        int DecodeInt32(MemoryStream buffer, out int value);
 
-        int DecodeUInt64(MemoryStream buffer, Span<byte> readBuffer, out ulong value);
+        int DecodeUInt64(MemoryStream buffer, out ulong value);
 
-        int DecodeInt64(MemoryStream buffer, Span<byte> readBuffer, out long value);
+        int DecodeInt64(MemoryStream buffer, out long value);
 
-        int DecodeHalf(MemoryStream buffer, Span<byte> readBuffer, out Half value);
+        int DecodeHalf(MemoryStream buffer, out Half value);
 
-        int DecodeSingle(MemoryStream buffer, Span<byte> readBuffer, out float value);
+        int DecodeSingle(MemoryStream buffer, out float value);
 
-        int DecodeDouble(MemoryStream buffer, Span<byte> readBuffer, out double value);
+        int DecodeDouble(MemoryStream buffer, out double value);
 
-        int DecodeString(MemoryStream buffer, Span<byte> readBuffer, out string value);
+        int DecodeString(MemoryStream buffer, out string value);
 
         int Encode(byte value, Span<byte> buffer, int offset = 0);
 
@@ -55,7 +55,9 @@ namespace Holtron.Net
 
         int Encode(double value, Span<byte> buffer, int offset = 0);
 
-        int Encode(string str, Span<byte> buffer, int offset = 0);
+        int Encode(string str, MemoryStream stream, bool includeSize = true);
+
+        int GetStringByteSize(string str, bool includeSize = false);
     }
 
     public static partial class PacketFormat

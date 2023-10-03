@@ -18,100 +18,102 @@ namespace Holtron.Net
 
             public Encoding StringEncoding { get; } = new UTF8Encoding(false);
 
-            public int DecodeByte(MemoryStream buffer, Span<byte> readBuffer, out byte value)
+            private readonly Memory<byte> _readBuffer = new(new byte[8 * DataSize.KILOBYTE]);
+
+            public int DecodeByte(MemoryStream buffer, out byte value)
             {
                 value = (byte)buffer.ReadByte();
                 return sizeof(byte);
             }
 
-            public int DecodeSByte(MemoryStream buffer, Span<byte> readBuffer, out sbyte value)
+            public int DecodeSByte(MemoryStream buffer, out sbyte value)
             {
                 value = (sbyte)buffer.ReadByte();
                 return sizeof(sbyte);
             }
 
-            public int DecodeUInt16(MemoryStream buffer, Span<byte> readBuffer, out ushort value)
+            public int DecodeUInt16(MemoryStream buffer, out ushort value)
             {
-                var tmp = readBuffer[..sizeof(ushort)];
+                var tmp = _readBuffer.Span[..sizeof(ushort)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = (ushort)((tmp[1] << 8) | tmp[0]);
                 return bytesRead;
             }
 
-            public int DecodeInt16(MemoryStream buffer, Span<byte> readBuffer, out short value)
+            public int DecodeInt16(MemoryStream buffer, out short value)
             {
-                var tmp = readBuffer[..sizeof(ushort)];
+                var tmp = _readBuffer.Span[..sizeof(ushort)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = (short)((tmp[1] << 8) | tmp[0]);
                 return bytesRead;
             }
 
-            public int DecodeUInt32(MemoryStream buffer, Span<byte> readBuffer, out uint value)
+            public int DecodeUInt32(MemoryStream buffer, out uint value)
             {
-                var tmp = readBuffer[..sizeof(uint)];
+                var tmp = _readBuffer.Span[..sizeof(uint)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = (uint)((tmp[3] << 24) | (tmp[2]) << 16 | (tmp[1] << 8) | tmp[0]);
                 return bytesRead;
             }
 
-            public int DecodeInt32(MemoryStream buffer, Span<byte> readBuffer, out int value)
+            public int DecodeInt32(MemoryStream buffer, out int value)
             {
-                var tmp = readBuffer[..sizeof(int)];
+                var tmp = _readBuffer.Span[..sizeof(int)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = (tmp[3] << 24) | (tmp[2]) << 16 | (tmp[1] << 8) | tmp[0];
                 return bytesRead;
             }
 
-            public int DecodeUInt64(MemoryStream buffer, Span<byte> readBuffer, out ulong value)
+            public int DecodeUInt64(MemoryStream buffer, out ulong value)
             {
-                var tmp = readBuffer[..sizeof(ulong)];
+                var tmp = _readBuffer.Span[..sizeof(ulong)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = BinaryPrimitives.ReadUInt64LittleEndian(tmp);
                 return bytesRead;
             }
 
-            public int DecodeInt64(MemoryStream buffer, Span<byte> readBuffer, out long value)
+            public int DecodeInt64(MemoryStream buffer, out long value)
             {
-                var tmp = readBuffer[..sizeof(long)];
+                var tmp = _readBuffer.Span[..sizeof(long)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = BinaryPrimitives.ReadInt64LittleEndian(tmp);
                 return bytesRead;
             }
 
-            public int DecodeHalf(MemoryStream buffer, Span<byte> readBuffer, out Half value)
+            public int DecodeHalf(MemoryStream buffer, out Half value)
             {
-                var tmp = readBuffer[..SIZE_HALF];
+                var tmp = _readBuffer.Span[..SIZE_HALF];
 
                 var bytesRead = buffer.Read(tmp);
                 value = BinaryPrimitives.ReadHalfLittleEndian(tmp);
                 return bytesRead;
             }
 
-            public int DecodeSingle(MemoryStream buffer, Span<byte> readBuffer, out float value)
+            public int DecodeSingle(MemoryStream buffer, out float value)
             {
-                var tmp = readBuffer[..sizeof(float)];
+                var tmp = _readBuffer.Span[..sizeof(float)];
 
                 var bytesRead = buffer.Read(tmp);
                 value = BinaryPrimitives.ReadSingleLittleEndian(tmp);
                 return bytesRead;
             }
 
-            public int DecodeDouble(MemoryStream buffer, Span<byte> readBuffer, out double value)
+            public int DecodeDouble(MemoryStream buffer, out double value)
             {
-                var tmp = readBuffer[..sizeof(double)];
+                var tmp = _readBuffer.Span[..sizeof(double)];
                 
                 var bytesRead = buffer.Read(tmp);
                 value = BinaryPrimitives.ReadDoubleLittleEndian(tmp);
                 return bytesRead;
             }
 
-            public int DecodeString(MemoryStream buffer, Span<byte> readBuffer, out string value)
+            public int DecodeString(MemoryStream buffer, out string value)
             {
                 value = "";
                 return 0;
@@ -211,10 +213,34 @@ namespace Holtron.Net
                 return sizeof(double);
             }
 
-            public int Encode(string str, Span<byte> buffer, int offset = 0)
+            /// <summary>
+            /// Strings will be encoded directly into the output stream without
+            /// using an intermediate buffer.
+            /// </summary>
+            public int Encode(string str, MemoryStream stream, bool includeSize = true)
             {
-                return StringEncoding.GetBytes(str, buffer.Slice(offset));
+                var sizeBytes = GetStringByteSize(str, includeSize: false);
+                if (includeSize)
+                {
+                    // This (should) be a bit faster than using BitConverter
+                    // to get convert the size of the string into a byte array
+                    var dataLen = new[]
+                    {
+                        (byte)(sizeBytes >> 24),
+                        (byte)(sizeBytes >> 16),
+                        (byte)(sizeBytes >> 8),
+                        (byte)(sizeBytes),
+                    };
+                    sizeBytes += dataLen.Length;
+                    stream.Write(dataLen);
+                }
+
+                stream.Write(StringEncoding.GetBytes(str));
+                return sizeBytes;
             }
+
+            public int GetStringByteSize(string str, bool includeSize = false) =>
+                StringEncoding.GetByteCount(str) + (includeSize ? sizeof(uint) : 0);
         }
     }
 }
