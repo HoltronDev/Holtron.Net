@@ -6,6 +6,8 @@ namespace Holtron.Net
 
         long Length { get; }
 
+        void Reset();
+
         /// <summary>
         /// Provides a way to call Seek on the underlying stream.
         /// This method will return 0 and have no effect if Seek cannot
@@ -72,6 +74,15 @@ namespace Holtron.Net
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public void Reset()
+        {
+            var buffer = _buffer.GetBuffer();
+            Array.Clear(buffer, 0, buffer.Length);
+            _buffer.Position = 0;
+            _buffer.SetLength(0);
+            _buffer.Capacity = 0;
         }
 
         /// <inheritdoc cref="INetBuffer.Seek"/>

@@ -13,6 +13,25 @@ namespace Holtron.Net.Tests.UnitTests
             Output = output;
         }
 
+        [Fact]
+        public void BufferCanBeReused()
+        {
+            var testValue1 = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
+            var testValue2 = new byte[] { 0xAA, 0xBB, 0x11, 0x22 };
+
+            using var sut = new NetBuffer2();
+            sut.Writer.Write(testValue1);
+            var output1 = sut.ToArray();
+
+            sut.Reset();
+
+            sut.Writer.Write(testValue2);
+            var output2 = sut.ToArray();
+
+            Assert.Equal(testValue1, output1);
+            Assert.Equal(testValue2, output2);
+        }
+
         [Theory]
         [InlineData(typeof(PacketFormat.None), 200)]
         public void BufferCanReadByte(Type packetFormat, byte value)
