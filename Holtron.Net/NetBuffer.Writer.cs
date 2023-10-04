@@ -1,8 +1,37 @@
 namespace Holtron.Net
 {
+    public interface IBufferWriter
+    {
+        int Write(byte value);
+
+        int Write(sbyte value);
+
+        int Write(ushort value);
+
+        int Write(short value);
+
+        int Write(uint value);
+
+        int Write(int value);
+
+        int Write(ulong value);
+
+        int Write(long value);
+
+        int Write(Half value);
+
+        int Write(float value);
+
+        int Write(double value);
+
+        int Write(byte[] data);
+
+        int Write(string str);
+    }
+
     public partial class NetBuffer2
     {
-        public class BufferWriter
+        public class BufferWriter : IBufferWriter
         {
             private readonly NetBuffer2 _buffer;
 

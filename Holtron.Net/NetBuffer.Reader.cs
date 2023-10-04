@@ -1,8 +1,61 @@
 namespace Holtron.Net
 {
+    public interface IBufferReader
+    {
+        byte ReadByte();
+
+        int ReadByte(out byte value);
+
+        sbyte ReadSByte();
+
+        int ReadSByte(out sbyte value);
+
+        ushort ReadUInt16();
+
+        int ReadUInt16(out ushort value);
+
+        short ReadInt16();
+
+        int ReadInt16(out short value);
+
+        uint ReadUInt32();
+
+        int ReadUInt32(out uint value);
+
+        int ReadInt32();
+
+        int ReadInt32(out int value);
+
+        ulong ReadUInt64();
+
+        int ReadUInt64(out ulong value);
+
+        long ReadInt64();
+
+        int ReadInt64(out long value);
+
+        Half ReadHalf();
+
+        int ReadHalf(out Half value);
+
+        float ReadSingle();
+
+        int ReadSingle(out float value);
+
+        double ReadDouble();
+
+        int ReadDouble(out double value);
+
+        int ReadBytes(byte[] buffer, int size);
+
+        int ReadBytes(Span<byte> buffer);
+
+        string ReadString();
+    }
+
     public partial class NetBuffer2
     {
-        public class BufferReader
+        public class BufferReader : IBufferReader
         {
             private readonly NetBuffer2 _buffer;
 

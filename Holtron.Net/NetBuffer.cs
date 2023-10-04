@@ -22,9 +22,9 @@ namespace Holtron.Net
 
         public IPacketFormat Format { get; }
 
-        public BufferReader Reader { get; }
+        public IBufferReader Reader { get; }
 
-        public BufferWriter Writer { get; }
+        public IBufferWriter Writer { get; }
 
         private readonly MemoryStream _buffer;
 
@@ -34,19 +34,33 @@ namespace Holtron.Net
         }
 
         public NetBuffer2(IPacketFormat packetFormat)
+            : this(packetFormat, reader: default, writer: default)
         {
-            _buffer = new MemoryStream();
-            Format = packetFormat;
-            Reader = new BufferReader(this);
-            Writer = new BufferWriter(this);
         }
 
         public NetBuffer2(IPacketFormat packetFormat, byte[] data)
+            : this(packetFormat, data, reader: default,  writer: default)
+        {
+        }
+
+        protected NetBuffer2(IPacketFormat packetFormat,
+            IBufferReader? reader = default,
+            IBufferWriter? writer = default)
+        {
+            _buffer = new MemoryStream();
+            Format = packetFormat;
+            Reader = reader ?? new BufferReader(this);
+            Writer = writer ?? new BufferWriter(this);
+        }
+
+        protected NetBuffer2(IPacketFormat packetFormat, byte[] data,
+            IBufferReader? reader = default,
+            IBufferWriter? writer = default)
         {
             _buffer = new MemoryStream(data);
             Format = packetFormat;
-            Reader = new BufferReader(this);
-            Writer = new BufferWriter(this);
+            Reader = reader ?? new BufferReader(this);
+            Writer = writer ?? new BufferWriter(this);
         }
 
         ~NetBuffer2()
