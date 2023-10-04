@@ -13,69 +13,103 @@ namespace Holtron.Net
 
             public byte ReadByte()
             {
-                _ = _buffer.Format.DecodeByte(_buffer._buffer, out var value);
+                _ = ReadByte(out var value);
                 return value;
             }
+
+            public int ReadByte(out byte value) =>
+                _buffer.Format.DecodeByte(_buffer._buffer, out value);
 
             public sbyte ReadSByte()
             {
-                _ = _buffer.Format.DecodeSByte(_buffer._buffer, out var value);
+                _ = ReadSByte(out var value);
                 return value;
             }
+
+            public int ReadSByte(out sbyte value) =>
+                _buffer.Format.DecodeSByte(_buffer._buffer, out value);
 
             public ushort ReadUInt16()
             {
-                _ = _buffer.Format.DecodeUInt16(_buffer._buffer, out var value);
+                _ = ReadUInt16(out var value);
                 return value;
             }
+
+            public int ReadUInt16(out ushort value) =>
+                _buffer.Format.DecodeUInt16(_buffer._buffer, out value);
 
             public short ReadInt16()
             {
-                _ = _buffer.Format.DecodeInt16(_buffer._buffer, out var value);
+                _ = ReadInt16(out var value);
                 return value;
             }
+
+            public int ReadInt16(out short value) =>
+                _buffer.Format.DecodeInt16(_buffer._buffer, out value);
 
             public uint ReadUInt32()
             {
-                _ = _buffer.Format.DecodeUInt32(_buffer._buffer, out var value);
+                _ = ReadUInt32(out var value);
                 return value;
             }
+
+            public int ReadUInt32(out uint value) =>
+                _buffer.Format.DecodeUInt32(_buffer._buffer, out value);
 
             public int ReadInt32()
             {
-                _ = _buffer.Format.DecodeInt32(_buffer._buffer, out var value);
+                _ = ReadInt32(out var value);
                 return value;
             }
+
+            public int ReadInt32(out int value) =>
+                _buffer.Format.DecodeInt32(_buffer._buffer, out value);
 
             public ulong ReadUInt64()
             {
-                _ = _buffer.Format.DecodeUInt64(_buffer._buffer, out var value);
+                _ = ReadUInt64(out var value);
                 return value;
             }
+
+            public int ReadUInt64(out ulong value) =>
+                _buffer.Format.DecodeUInt64(_buffer._buffer, out value);
 
             public long ReadInt64()
             {
-                _ = _buffer.Format.DecodeInt64(_buffer._buffer, out var value);
+                _ = ReadInt64(out var value);
                 return value;
             }
+
+            public int ReadInt64(out long value) =>
+                _buffer.Format.DecodeInt64(_buffer._buffer, out value);
 
             public Half ReadHalf()
             {
-                _ = _buffer.Format.DecodeHalf(_buffer._buffer, out var value);
+                _ = ReadHalf(out var value);
                 return value;
             }
+
+            public int ReadHalf(out Half value) =>
+                _buffer.Format.DecodeHalf(_buffer._buffer, out value);
+
 
             public float ReadSingle()
             {
-                _ = _buffer.Format.DecodeSingle(_buffer._buffer, out var value);
+                _ = ReadSingle(out var value);
                 return value;
             }
 
+            public int ReadSingle(out float value) =>
+                _buffer.Format.DecodeSingle(_buffer._buffer, out value);
+
             public double ReadDouble()
             {
-                _ = _buffer.Format.DecodeDouble(_buffer._buffer, out var value);
+                _ = ReadDouble(out var value);
                 return value;
             }
+
+            public int ReadDouble(out double value) =>
+                _buffer.Format.DecodeDouble(_buffer._buffer, out value);
 
             public int ReadBytes(byte[] buffer, int size)
             {
