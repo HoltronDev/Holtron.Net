@@ -10,7 +10,7 @@ namespace Holtron.Net
             /// <summary>
             /// Byte size of <see cref="Half"/>.
             /// </summary>
-            private const int SIZE_HALF = 2;
+            private const int SIZE_HALF = sizeof(float) / 2;
 
             public static None Instance => LazyInstance.Value;
 
@@ -261,6 +261,24 @@ namespace Holtron.Net
 
             public int GetStringByteSize(string str, bool includeSize = false) =>
                 StringEncoding.GetByteCount(str) + (includeSize ? sizeof(uint) : 0);
+
+            public int GetEncodedSize<T>(T value) => value switch
+            {
+                byte => sizeof(byte),
+                sbyte => sizeof(sbyte),
+                ushort => sizeof(ushort),
+                short => sizeof(short),
+                uint => sizeof(uint),
+                int => sizeof(int),
+                ulong => sizeof(ulong),
+                long => sizeof(long),
+                Half => sizeof(float) / 2,
+                float => sizeof(float),
+                double => sizeof(double),
+                byte[] v => v.Length,
+                string str => GetStringByteSize(str),
+                _ => 0, // Unrecognized type.
+            };
         }
     }
 }

@@ -422,6 +422,28 @@ namespace Holtron.Net.Tests.UnitTests
             Assert.Equal(str, outStr);
         }
 
+        [Fact]
+        public void BufferSupportsBufferedWrites()
+        {
+            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            // The number of bytes in the underlying MemoryStream should be empty to start with.
+            Assert.Equal(0, sut.Length);
+
+            // Writing a value should only be captured by the pending write buffer and not the
+            // underlying MemoryStream.
+            sut.Writer.Write(1000ul);
+            Assert.Equal(0, sut.Length);
+            
+            // Same as above.
+            sut.Writer.Write(1000ul);
+            Assert.Equal(0, sut.Length);
+
+            // Committing the pending data should actually cause the
+            // underlying memory.
+            sut.Writer.CommitPending();
+            Assert.Equal(sizeof(ulong) * 2, sut.Length);
+        }
+
         private NetBuffer2 CreateTestBuffer(Type packetFormat) => packetFormat switch
         {
             _ => CreateTestBuffer(PacketFormat.None.Instance),

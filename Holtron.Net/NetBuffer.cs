@@ -94,7 +94,14 @@ namespace Holtron.Net
             return _buffer.Seek(offset, origin);
         }
 
-        public byte[] ToArray() => _buffer.ToArray();
+        public byte[] ToArray()
+        {
+            // If there is anything in pending write buffer, we'll want to make sure
+            // that anything pending gets committed to the actual stream.
+            _ = Writer.CommitPending();
+
+            return _buffer.ToArray();
+        }
 
         protected bool Commit(Memory<byte> pending, ref int length)
         {

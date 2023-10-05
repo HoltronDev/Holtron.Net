@@ -58,6 +58,8 @@ namespace Holtron.Net
         int Encode(string str, MemoryStream stream, bool includeSize = true);
 
         int GetStringByteSize(string str, bool includeSize = false);
+
+        int GetEncodedSize<T>(T value);
     }
 
     public static partial class PacketFormat
