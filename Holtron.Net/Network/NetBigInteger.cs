@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -8,7 +8,7 @@ namespace Holtron.Net.Network
     /// <summary>
     /// Big integer class based on BouncyCastle (http://www.bouncycastle.org) big integer code
     /// </summary>
-    internal class NetBigInteger
+    public class NetBigInteger
     {
         #region Properties
         public int BitLength
