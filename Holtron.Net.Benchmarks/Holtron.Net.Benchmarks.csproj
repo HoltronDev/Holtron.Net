@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Holtron.Net\Holtron.Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\" />
+  </ItemGroup>
+
 </Project>
