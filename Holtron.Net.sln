@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Holtron.Net.Examples.BasicC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Holtron.Net.Examples.BasicServer", "Holtron.Net.Examples\Holtron.Net.Examples.BasicServer\Holtron.Net.Examples.BasicServer.csproj", "{D18B9625-EF1C-4CFD-95EB-6B1D57E3523D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Holtron.Net.Benchmarks", "Holtron.Net.Benchmarks\Holtron.Net.Benchmarks.csproj", "{9652A7A4-81CD-409C-9D86-35E82C930A87}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{D18B9625-EF1C-4CFD-95EB-6B1D57E3523D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D18B9625-EF1C-4CFD-95EB-6B1D57E3523D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D18B9625-EF1C-4CFD-95EB-6B1D57E3523D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9652A7A4-81CD-409C-9D86-35E82C930A87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9652A7A4-81CD-409C-9D86-35E82C930A87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9652A7A4-81CD-409C-9D86-35E82C930A87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9652A7A4-81CD-409C-9D86-35E82C930A87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
