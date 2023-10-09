@@ -259,6 +259,57 @@ namespace Holtron.Net
                 return sizeBytes;
             }
 
+            public int Encode<T>(T value, Span<byte> buffer, int offset = 0)
+            {
+                var encodedSize = GetEncodedSize(value);
+                if (buffer.Length < encodedSize)
+                    return 0;
+
+                switch (value)
+                {
+                    case byte val:
+                        buffer[offset] = val;
+                        return sizeof(byte);
+                    case sbyte val:
+                        buffer[offset] = unchecked((byte)val);
+                        return sizeof(sbyte);
+                    case ushort val:
+                        BinaryPrimitives.WriteUInt16LittleEndian(buffer, val);
+                        return sizeof(ushort);
+                    case short val:
+                        BinaryPrimitives.WriteInt16LittleEndian(buffer, val);
+                        return sizeof(short);
+                    case uint val:
+                        BinaryPrimitives.WriteUInt32LittleEndian(buffer, val);
+                        return sizeof(uint);
+                    case int val:
+                        BinaryPrimitives.WriteInt32LittleEndian(buffer, val);
+                        return sizeof(int);
+                    case ulong val:
+                        BinaryPrimitives.WriteUInt64LittleEndian(buffer, val);
+                        return sizeof(ulong);
+                    case long val:
+                        BinaryPrimitives.WriteInt64LittleEndian(buffer, val);
+                        return sizeof(long);
+                    case Half val:
+                        BinaryPrimitives.WriteHalfLittleEndian(buffer, val);
+                        return SIZE_HALF;
+                    case float val:
+                        BinaryPrimitives.WriteSingleLittleEndian(buffer, val);
+                        return sizeof(float);
+                    case double val:
+                        BinaryPrimitives.WriteDoubleLittleEndian(buffer, val);
+                        return sizeof(double);
+                    case string:
+                        throw new InvalidOperationException(
+                            "Encode<T> cannot be used to encode strings. Use Encode(string, MemoryStream, ...) instead.");
+                    default:
+                        throw new NotSupportedException($"Encoding {typeof(T).Name} is not supported.");
+                }
+
+                return 0;
+            }
+
             public int GetStringByteSize(string str, bool includeSize = false) =>
                 StringEncoding.GetByteCount(str) + (includeSize ? sizeof(uint) : 0);
 

@@ -382,7 +382,8 @@ namespace Holtron.Net.Tests.UnitTests
             Assert.Equal(expectedSize, sizeWritten);
 
             var output = sut.ToArray().AsSpan();
-            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
+            var outLen = sut.Format.StringEncoding.GetByteCount(str);
+            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint), outLen));
             Assert.Equal(str, outStr);
         }
 
@@ -418,7 +419,8 @@ namespace Holtron.Net.Tests.UnitTests
             var outSize = BitConverter.ToUInt32(outSizeBytes);
             Assert.Equal((uint)(expectedSize - sizeof(uint)), outSize);
 
-            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint)));
+            var outLen = sut.Format.StringEncoding.GetByteCount(str);
+            var outStr = sut.Format.StringEncoding.GetString(output.Slice(sizeof(uint),  outLen));
             Assert.Equal(str, outStr);
         }
 

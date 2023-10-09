@@ -57,6 +57,8 @@ namespace Holtron.Net
 
         int Encode(string str, MemoryStream stream, bool includeSize = true);
 
+        int Encode<T>(T value, Span<byte> buffer, int offset = 0);
+
         int GetStringByteSize(string str, bool includeSize = false);
 
         int GetEncodedSize<T>(T value);
