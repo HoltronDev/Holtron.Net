@@ -186,7 +186,7 @@ namespace Holtron.Net.Tests.UnitTests
         [InlineData("The quick brown fox jumped over the lazy dog.")]
         public void BufferCanReadBasicString(string str)
         {
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             sut.Writer.Write(str);
             sut.Seek(0, SeekOrigin.Begin);
 
@@ -200,7 +200,7 @@ namespace Holtron.Net.Tests.UnitTests
             // Generate a string that should be large enough to fill the underlying read buffer.
             var str = GenerateRandomString(10 * DataSize.KILOBYTE);
 
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             sut.Writer.Write(str);
             sut.Seek(0, SeekOrigin.Begin);
 
@@ -214,7 +214,7 @@ namespace Holtron.Net.Tests.UnitTests
         [InlineData("Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
         public void BufferCanReadStringWithUnicode(string str)
         {
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             sut.Writer.Write(str);
             sut.Seek(0, SeekOrigin.Begin);
 
@@ -376,7 +376,7 @@ namespace Holtron.Net.Tests.UnitTests
         [InlineData("The quick brown fox jumped over the lazy dog.")]
         public void BufferCanWriteBasicString(string str)
         {
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
@@ -393,7 +393,7 @@ namespace Holtron.Net.Tests.UnitTests
             // Generate a string that should be large enough to fill the underlying write buffer.
             var str = GenerateRandomString(10 * DataSize.KILOBYTE);
 
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
@@ -409,7 +409,7 @@ namespace Holtron.Net.Tests.UnitTests
         [InlineData("Быстрая, коричневая лиса, перепрыгнула через ленивого пса.")]
         public void BufferCanWriteStringWithUnicode(string str)
         {
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             var expectedSize = sut.Format.GetStringByteSize(str, includeSize: true);
             var sizeWritten = sut.Writer.Write(str);
             Assert.Equal(expectedSize, sizeWritten);
@@ -427,7 +427,7 @@ namespace Holtron.Net.Tests.UnitTests
         [Fact]
         public void BufferSupportsBufferedWrites()
         {
-            using var sut = CreateTestBuffer(PacketFormat.None.Instance);
+            using var sut = CreateTestBuffer(new PacketFormat.None());
             // The number of bytes in the underlying MemoryStream should be empty to start with.
             Assert.Equal(0, sut.Length);
 
@@ -448,7 +448,7 @@ namespace Holtron.Net.Tests.UnitTests
 
         private NetBuffer2 CreateTestBuffer(Type packetFormat) => packetFormat switch
         {
-            _ => CreateTestBuffer(PacketFormat.None.Instance),
+            _ => CreateTestBuffer(new PacketFormat.None()),
         };
 
         private NetBuffer2 CreateTestBuffer(IPacketFormat format) => new(format);
@@ -457,7 +457,7 @@ namespace Holtron.Net.Tests.UnitTests
 
         private NetBuffer2 CreateTestBuffer(Type packetFormat, byte[] data) => packetFormat switch
         {
-            _ => CreateTestBuffer(PacketFormat.None.Instance, data),
+            _ => CreateTestBuffer(new PacketFormat.None(), data),
         };
 
         private string GenerateRandomString(int size)

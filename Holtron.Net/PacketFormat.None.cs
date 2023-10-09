@@ -12,10 +12,6 @@ namespace Holtron.Net
             /// </summary>
             private const int SIZE_HALF = sizeof(float) / 2;
 
-            public static None Instance => LazyInstance.Value;
-
-            private static readonly Lazy<None> LazyInstance = new(() => new None());
-
             public Encoding StringEncoding { get; } = new UTF8Encoding(false);
 
             private readonly Memory<byte> _readBuffer = new(new byte[8 * DataSize.KILOBYTE]);

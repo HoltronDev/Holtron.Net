@@ -109,6 +109,9 @@ namespace Holtron.Net
                     return bytes.Length;
                 }
 
+                if (value is string str)
+                    return WriteString(str);
+
                 if (_writeOffset > _writeBuffer.Length)
                 {
                     throw new InvalidOperationException("Cannot generate buffer destination for write.");
@@ -128,7 +131,6 @@ namespace Holtron.Net
                     Half val => _buffer.Format.Encode(val, buffer),
                     float val => _buffer.Format.Encode(val, buffer),
                     double val => _buffer.Format.Encode(val, buffer),
-                    string val => WriteString(val),
                     _ => throw new NotSupportedException($"Encoding {typeof(T).Name} is not supported."),
                 };
 
