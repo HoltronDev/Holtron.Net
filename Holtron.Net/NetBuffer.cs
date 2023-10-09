@@ -105,6 +105,13 @@ namespace Holtron.Net
 
         protected bool Commit(Memory<byte> pending, ref int length)
         {
+            if (pending.Length <= length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length),
+                    "The size slice size to write to the MemoryStream for write is larger than the pending buffer size. " +
+                    $"Pending buffer size is {pending.Length} bytes. Specified length is {length} bytes.");
+            }
+
             var tmp = pending.Span[..length];
             _buffer.Write(tmp);
             tmp.Fill(0);

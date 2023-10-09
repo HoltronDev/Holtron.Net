@@ -109,6 +109,11 @@ namespace Holtron.Net
                     return bytes.Length;
                 }
 
+                if (_writeOffset > _writeBuffer.Length)
+                {
+                    throw new InvalidOperationException("Cannot generate buffer destination for write.");
+                }
+
                 var buffer = _writeBuffer.Span.Slice(_writeOffset);
                 var formattedSize = value switch
                 {
